@@ -5,6 +5,7 @@
         
         <button @click="p1++">p1++</button>
        
+       
     </div>
 </template>
 <script>

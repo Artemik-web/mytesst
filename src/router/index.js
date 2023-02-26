@@ -4,15 +4,13 @@ import {createRouter,createWebHashHistory} from 'vue-router'
 
 // Vue.use(VueRouter)
 //页面懒加载
-const Login = () => import('../views/Login.vue')
-const Test = () => import('../views/Test.vue')
 const Home = () => import('../views/Home.vue')
+const Test = () => import('../views/Test.vue')
 const routes = [
-    {path: '/', redirect: '/login'},
+    {path: '/', redirect: '/home'},
     //登陆
-    {name: 'login', path: '/Login', component: Login},
+    {name: 'home', path: '/home', component: Home},
     {path: '/test', component: Test},
-    {path: '/home', component: Home}
 ]
 
 const router = createRouter({
