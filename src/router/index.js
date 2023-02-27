@@ -4,13 +4,16 @@ import {createRouter,createWebHashHistory} from 'vue-router'
 
 // Vue.use(VueRouter)
 //页面懒加载
+const NotFound = () => import('../views/NotFound.vue')
 const Home = () => import('../views/Home.vue')
 const Test = () => import('../views/Test.vue')
 const routes = [
-    {path: '/', redirect: '/home'},
-    //登陆
+    {path: '/', redirect: '/home', component: Home},
+    {path: '/:catchAll(.*)', redirect: '/notfound', component: NotFound},
     {name: 'home', path: '/home', component: Home},
-    {path: '/test', component: Test},
+    {name: 'notfound', path: '/notfound', component: NotFound},
+    {name: 'test', path: '/test', component: Test},
+    
 ]
 
 const router = createRouter({

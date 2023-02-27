@@ -3,15 +3,16 @@ import { createStore } from "vuex"
 
 export default createStore({
   //创建数据仓库
-  state: {name: '马云',
-  client: window.matchMedia('(min-width: 768px)').matches? 'pc' : 'mobile'
+  state: {
+    islogin: false,
+    client: window.matchMedia('(min-width: 768px)').matches? 'pc' : 'mobile'
   },
  
   //同步调用
   mutations: {
     tigger(state,val){
       
-      state.client = val
+      state.islogin = val
       // console.log('我是同步调用的方法',state.client)
     }
   },

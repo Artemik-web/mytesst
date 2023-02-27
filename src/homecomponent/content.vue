@@ -86,8 +86,8 @@ $bg-color: #E6E5E1;
 $shdow-gray: #d3d3d5;
 $orange: #DA4D1D;
 $blue: #2b26c3;
-$img-url: "https://i.328888.xyz/2023/02/26/EPg4p.jpeg";
-$img-url2: "https://i.328888.xyz/2023/02/26/EP7dv.jpeg";
+$img-url: "../assets/image/1.jpg";
+$img-url2: "../assets/image/2.jpg";
 
 * {
   margin: 0;

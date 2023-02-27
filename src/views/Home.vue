@@ -33,8 +33,8 @@
           </el-form>
           <!-- 登陆注册按钮 -->
           <div class="action">
-            <el-button type="success" @click="register">注册</el-button>
-            <el-button type="primary" @click="login">登陆</el-button>
+            <el-button type="success" @click="reg">注册</el-button>
+            <el-button type="primary" @click="log">登陆</el-button>
           </div>
           
         </el-aside>
@@ -54,8 +54,8 @@
           <span>账号:</span><el-input v-model="password" type="password" placeholder="请输入密码" maxlength="10" clearable show-password/>
         </div>
         <div class="actions">
-          <button @click="register" class="register">注册</button>
-          <button @click="login" class="login">登录</button>
+          <button @click="register" class="reg">注册</button>
+          <button @click="login" class="log">登录</button>
         </div>
       </div>
     </div>
@@ -63,78 +63,90 @@
 </template>
 <script>
 import HomeConent from '../homecomponent/content.vue'
-import { computed,reactive,toRefs, getCurrentInstance } from 'vue'
+import { computed,reactive,toRefs } from 'vue'
 import {useStore} from 'vuex'
-import {post} from '../api/api'
-import { h } from 'vue'
+import {login, register} from '../api/login'
+import {setToken} from '../untils/setToken'
 import { ElMessage } from 'element-plus'
+import router from '../router'
+
 export default{
   setup(){
-    const openVn = (mes) => {
-      ElMessage({
-        message: h('p', null, [
-          h('span', null, mes),
-          // h('i', { style: 'color: teal' }, 'VNode'),
-        ]),
-      })
-    }
-    const a = getCurrentInstance()
-    console.log(a)
+   
     const user = reactive({
       username: '',
       password: ''
     })
     const store = useStore()
     const client = computed(()=>{return store.state.client})
-
-    const register = ()=> {
+    
+    //注册 api
+    const reg = ()=> {
       if (user.username && user.password){
-          post('/api/reguser',
-          user
-          ).then(res=> {
-            console.log(res)
-            if(!(res.data.status)){
-              openVn('注册成功!')
-            }
-            else{
-              openVn(`注册失败!${res.data.message}`)
-            }
-
-          }).catch(err=>{
-            console.log(err)
+        register(user).then(res=> {
+                if(!(res.data.status)){
+                  ElMessage({
+                  message: '注册成功!',
+                  type: 'success'
+                  })
+                }
+                else{
+                  ElMessage({
+                  message: `注册失败!${res.data.message}`,
+                  type: 'error'
+                  })
+                }
+          }).catch(error =>{
+            return error
           })
-      }
-      else{
-        openVn('请先输入用户名及密码!')
-      }
-      
+      }else{
+            ElMessage({
+                message: '请先输入用户名及密码!',
+                type: 'warning'
+                })
+          }
     }
-      
-    const login = ()=> {
-      console.log(user.username,user.password)
+    //登录 api
+    console.log(1,store.state.islogin)
+    const log = ()=> {
       if (user.username && user.password){
-        post('/api/login',user).then(res=> {
-        console.log(res)
-        if(!res.data.status){
-          openVn('登录成功!')
-        }
-        else{
-          openVn(`登录失败!${res.data.message}`)
-        }
-      })
+      login(user).then(res=> {
+          //登陆成功状态为0，状态码200
+          if(!res.data.status){
+            setToken('username',user.username)
+            setToken(`PB_token`,res.data.token)
+            store.state.islogin = true;
+            // console.log(2,store.state.islogin)
+            ElMessage({
+              message: '登录成功!',
+              type: 'success'
+            })
+            //路由跳转
+            router.push('/test')
+          }
+          else{
+            ElMessage({
+              message: `登录失败!${res.data.message}`,
+              type: 'error'
+            })
+          }
+        })
       }
       else{
-        openVn('请先输入用户名及密码!')
-      }
-      
+          ElMessage({
+              message: '请先输入用户名及密码!',
+              type: 'warning'
+            })
+        }
     }
   return {
     client,
     HomeConent,
     ...toRefs(user),
-    register,
-    login,
-    openVn
+    reg,
+    log,
+    // ElMessage
+
   }
   
 }
