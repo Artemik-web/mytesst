@@ -19,9 +19,14 @@ const httpinsatnce = axios.create({
 //添加请求拦截器
 httpinsatnce.interceptors.request.use(
     (config) => {
-    //在请求前要做的(获取并设置token)
-    config.headers['token'] = getToken('PB_token')
-    return config
+        const token = getToken('PB_token')
+        if(token){
+            //如果已经有token说明已经登陆，再请求时就可以在请求头携带token
+            config.headers.Authorization = localStorage.getItem('PB_token')
+        }
+        //在请求前要做的(获取并设置token)
+        
+        return config
     },
     //出现错误时
     (error) => {

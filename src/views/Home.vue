@@ -17,7 +17,8 @@
             <el-form-item class="" label="账号">
               <el-input 
                 v-model="username"
-                placeholder="请输入账号">
+                placeholder="请输入账号"
+                >
               </el-input>
             </el-form-item>
             <el-form-item label="密码" prop="pass">
@@ -28,6 +29,7 @@
                 maxlength="10"
                 clearable
                 show-password
+                
                 />
               </el-form-item>
           </el-form>
@@ -54,8 +56,8 @@
           <span>账号:</span><el-input v-model="password" type="password" placeholder="请输入密码" maxlength="10" clearable show-password/>
         </div>
         <div class="actions">
-          <button @click="register" class="reg">注册</button>
-          <button @click="login" class="log">登录</button>
+          <button  @click="reg" class="reg">注册</button>
+          <button @click="log" class="log">登录</button>
         </div>
       </div>
     </div>
@@ -63,22 +65,24 @@
 </template>
 <script>
 import HomeConent from '../homecomponent/content.vue'
-import { computed,reactive,toRefs } from 'vue'
+import { computed, reactive,toRefs } from 'vue'
 import {useStore} from 'vuex'
 import {login, register} from '../api/login'
 import {setToken} from '../untils/setToken'
 import { ElMessage } from 'element-plus'
 import router from '../router'
-
 export default{
   setup(){
-   
+    const usr = localStorage.getItem('username')
     const user = reactive({
-      username: '',
+      username: usr,
       password: ''
     })
     const store = useStore()
-    const client = computed(()=>{return store.state.client})
+    const client =computed(()=>{
+      console.log(store.state.client)
+      return store.state.client
+    }) 
     
     //注册 api
     const reg = ()=> {
@@ -115,6 +119,7 @@ export default{
           if(!res.data.status){
             setToken('username',user.username)
             setToken(`PB_token`,res.data.token)
+            setToken('startTime', new Date().getTime())
             store.state.islogin = true;
             // console.log(2,store.state.islogin)
             ElMessage({
@@ -122,7 +127,7 @@ export default{
               type: 'success'
             })
             //路由跳转
-            router.push('/test')
+            router.push('/userhome')
           }
           else{
             ElMessage({

@@ -15,7 +15,7 @@ module.exports = {
                 ws: true, 
                 //3 重写路径
                 pathRewrite: {
-                    '^/api': ''
+                    '^/api': 'http://47.115.214.138:3007'
                 }
             }
         }

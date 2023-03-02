@@ -5,6 +5,7 @@ export default createStore({
   //创建数据仓库
   state: {
     islogin: false,
+    // client: window.matchMedia('(min-width: 768px)').matches? 'pc' : 'mobile'
     client: window.matchMedia('(min-width: 768px)').matches? 'pc' : 'mobile'
   },
  
@@ -12,7 +13,7 @@ export default createStore({
   mutations: {
     tigger(state,val){
       
-      state.islogin = val
+      state.client = val
       // console.log('我是同步调用的方法',state.client)
     }
   },
