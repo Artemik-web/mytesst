@@ -37,7 +37,7 @@ router.beforeEach((to, from, next) => {
     if(localStorage.getItem('startTime')){
         const now = new Date().getTime()
         const onlineTime = now - localStorage.getItem('startTime')
-        console.log(onlineTime)
+        // console.log(onlineTime)
         //1小时内有刷新验证则不退出
         if(onlineTime > 3600000){
             ElMessage({message: '长时间未验证账号,请重新登录！', type: 'error'})

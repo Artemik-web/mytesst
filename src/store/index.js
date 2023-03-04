@@ -20,7 +20,7 @@ export default createStore({
   //异步调用
   actions: {
     sub(store){
-      console.log('****,我是异步调用')
+      // console.log('****,我是异步调用')
       //不能直接调用
       store.commit('tigger')
     }

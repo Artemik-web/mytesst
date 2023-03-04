@@ -37,9 +37,9 @@ httpinsatnce.interceptors.request.use(
 httpinsatnce.interceptors.response.use(
     (response) => {
     //对响应数据做什么
-        console.log('得到响应数据' + response)
+        // console.log('得到响应数据' + response)
     let {status, message} = response
-    console.log(status)
+    // console.log(status)
     if (status !== 200){
         ElMessage({message: message || 'error', type: 'warning'})
         return

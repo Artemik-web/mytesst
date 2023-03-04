@@ -80,7 +80,7 @@ export default{
     })
     const store = useStore()
     const client =computed(()=>{
-      console.log(store.state.client)
+      // console.log(store.state.client)
       return store.state.client
     }) 
     
@@ -111,7 +111,7 @@ export default{
           }
     }
     //登录 api
-    console.log(1,store.state.islogin)
+    // console.log(1,store.state.islogin)
     const log = ()=> {
       if (user.username && user.password){
       login(user).then(res=> {
