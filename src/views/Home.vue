@@ -67,7 +67,7 @@
 import HomeConent from '../homecomponent/content.vue'
 import { computed, reactive,toRefs } from 'vue'
 import {useStore} from 'vuex'
-import {login, register} from '../api/login'
+import {login, register} from '../api/register_login'
 import {setToken} from '../untils/setToken'
 import { ElMessage } from 'element-plus'
 import router from '../router'
