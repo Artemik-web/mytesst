@@ -6,7 +6,8 @@ export default createStore({
   state: {
     islogin: false,
     // client: window.matchMedia('(min-width: 768px)').matches? 'pc' : 'mobile'
-    client: window.matchMedia('(min-width: 768px)').matches? 'pc' : 'mobile'
+    client: window.matchMedia('(min-width: 768px)').matches? 'pc' : 'mobile',
+    username: '',
   },
  
   //同步调用

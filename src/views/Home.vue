@@ -23,6 +23,7 @@
             </el-form-item>
             <el-form-item label="密码" prop="pass">
               <el-input
+                @keyup.enter="log"
                 v-model="password"
                 type="password"
                 placeholder="请输入密码"
@@ -36,7 +37,7 @@
           <!-- 登陆注册按钮 -->
           <div class="action">
             <el-button type="success" @click="reg">注册</el-button>
-            <el-button type="primary" @click="log">登陆</el-button>
+            <el-button type="primary" @click="log"  >登陆</el-button>
           </div>
           
         </el-aside>
@@ -121,13 +122,15 @@ export default{
             setToken(`PB_token`,res.data.token)
             setToken('startTime', new Date().getTime())
             store.state.islogin = true;
-            // console.log(2,store.state.islogin)
+            store.state.username = user.username;
+            // console.log(2,store.state)
             ElMessage({
               message: '登录成功!',
               type: 'success'
             })
             //路由跳转
-            router.push('/userhome')
+            // $route.params.username
+            router.push({name: 'square'})
           }
           else{
             ElMessage({
