@@ -4,16 +4,18 @@
       <div class="userInfo">
         <ul class="info">
           <li>头像：<el-avatar :src="avatarImg" /></li>
-          <li>用户昵称：{{ userData.data.nickname }}</li>
-          <li>用户名：{{ userData.data.username }}</li>
+          <li>昵称：{{ userData.data.nickname }}</li>
           <li>id: {{ userData.data.id }}</li>
-          <li>邮箱：{{ userData.data.email }}</li>
+          <li>邮箱: {{ userData.data.email }}</li>
         </ul>
         <div class="action">
-          <el-button type="primary" class="avatar">
-            <!-- 默认上传文件格式为file -->
-            <el-upload ref="upload" :auto-upload="false" :show-file-list="false" action="#" :on-change="changeAvatar">头像修改</el-upload></el-button>
-          <el-button type="primary" class="psd">重置密码</el-button>
+
+          <!-- 默认上传文件格式为file -->
+          <el-upload ref="upload" :auto-upload="false" :show-file-list="false" action="#" :on-change="changeAvatar">
+            <el-button type="primary" class="avatar">修改头像</el-button>
+          </el-upload>
+
+          <el-button class="psd">重置密码</el-button>
         </div>
         <button @click="logout">退出</button>
       </div>
@@ -28,19 +30,19 @@
       </div>
     </div>
     <el-dialog v-model="dialogVisible" title="第一次登录请您先设置您的账号信息" :close-on-click-modal="false" :show-close="false"
-        :close-on-press-escape="false">
-        <el-form :rules="rules" ref="ruleFrom" :model="formData" label-width="80px">
-          <el-form-item label="昵称：" prop="nickname">
-            <el-input v-model="formData.nickname" required></el-input>
-          </el-form-item>
-          <el-form-item label="邮箱" prop="email">
-            <el-input v-model="formData.email"></el-input>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="onSubmit">提交</el-button>
-          </el-form-item>
-        </el-form>
-      </el-dialog>
+      :close-on-press-escape="false">
+      <el-form :rules="rules" ref="ruleFrom" :model="formData" label-width="80px">
+        <el-form-item label="昵称：" prop="nickname">
+          <el-input v-model="formData.userInfo.nickname" required></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="formData.userInfo.email"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="onSubmit">提交</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -59,10 +61,17 @@ export default {
     let userData = reactive({ data: [] });
     let dialogVisible = ref(false);
     let formData = reactive({
-      nickname: "",
-      // gender:'1',
-      // birthday: '',
-      email: "",
+      userInfo: {
+        nickname: "",
+        // gender:'1',
+        // birthday: '',
+        email: "",
+      },
+      updatePsd: {
+        oldPwd: "",
+        newPwd: ""
+      }
+
     });
     const ruleFrom = ref(null);
     let rules = {
@@ -105,7 +114,7 @@ export default {
     function getinfo() {
       getUserinfo().then((res) => {
         userData.data = res.data.data;
-        avatarImg.value = res.data.data.user_pic;
+        avatarImg.value = res.data.data.user_pic || "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
         store.state.username = res.data.data.username;
 
         if (!res.data.data.nickname) {
@@ -117,7 +126,7 @@ export default {
     getinfo();
     // console.log(userData)
     // // //从vuex仓库中取数据
-  
+
     // const res = computed(()=>{
     //     return store.state.islogin
     // })
@@ -127,12 +136,12 @@ export default {
       ruleFrom.value.validate((valid) => {
         if (valid) {
           updateUserinfo({
-            nickname: formData.nickname,
-            email: formData.email,
+            nickname: formData.userInfo.nickname,
+            email: formData.userInfo.email,
           })
             .then((res) => {
-              userData.data.nickname = formData.nickname;
-              userData.data.email = formData.email;
+              userData.data.nickname = formData.userInfo.nickname;
+              userData.data.email = formData.userInfo.email;
               dialogVisible.value = false;
               console.log("dialogVisible", res);
             })
@@ -171,41 +180,52 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-  .container {
-    .userInfo {
-      float: left;
-      height: 2000px;
-      border-radius: 10px;
-      // background: rgba($color: #175ed0, $alpha: 0.5);
-      background-color: wheat;
+.container {
+  .userInfo {
+    float: left;
+    height: 2000px;
+    border-radius: 10px;
+    // background: rgba($color: #175ed0, $alpha: 0.5);
+    background-color: wheat;
 
-      .info {
-        padding-top: 30px;
-      }
+    .info {
+      padding-top: 30px;
 
-      .action {
-        .avatar {
-          margin-bottom: 10px;
-        }
-
-        .psd {
-          margin-left: 0;
-        }
+      li {
+        padding-bottom: 15px;
+        padding-left: 8px;
       }
     }
-    .article_box{
-      overflow: hidden;
-      ul{
-        
-        padding-top: 30px;
-        li{
-          margin: 0 auto;
-          width: 600px;
-          height: 400px;
-          background-color: blueviolet;
-        }
+
+    .action {
+      display: flex;
+      padding: 10px 5px 0;
+
+      .avatar {
+        background-color: #409EFF;
+        color: white;
+      }
+
+      .psd {
+        margin-left: 10px;
+        color: white;
+        background-color: #409EFF;
       }
     }
   }
 
-</style>
+  .article_box {
+    overflow: hidden;
+
+    ul {
+      padding-top: 30px;
+
+      li {
+        margin: 0 auto 20px;
+        width: 600px;
+        height: 400px;
+        background-color: blueviolet;
+      }
+    }
+  }
+}</style>

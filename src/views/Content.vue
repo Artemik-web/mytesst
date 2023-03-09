@@ -1,6 +1,6 @@
 <template>
     <div class="userhome">
-        <Header :username="username"></Header>
+        <Header></Header>
         <div class="content">
             <router-view></router-view>
         </div>

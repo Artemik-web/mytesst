@@ -12,18 +12,29 @@
                 <li></li>
                 <li></li>
             </ul>
+            <Dailog :formData="formData"></Dailog>
         </div>
         
     </div>
 </template>
 <script>
+import { reactive } from 'vue'
 import Header from '@/component/header.vue'
+import Dailog from '@/component/dailog.vue'
 export default {
     components: {
-        Header
+        Header,
+        Dailog
     },
     setup(){
-
+        const formData = reactive({
+            user: {
+                title: '1111'
+            }
+        })
+        return{
+            formData
+        }
     }
 }
 </script>
