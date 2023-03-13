@@ -14,13 +14,13 @@ const routes = [
     { path: '/', redirect: '/home', component: Home },
     { path: '/:catchAll(.*)', redirect: '/notfound', component: NotFound },
     { name: 'home', path: '/home', component: Home },
-    {name: 'square', path: '/square', component: square},
+    { name: 'square', path: '/square', component: square },
     {
         name: 'userhome', path: '/:username', component: Content,
         children: [
             // { name: 'square', path: '/:username/square', component: square },
             { name: 'userinfo', path: '/:username', component: userinfo },
-            
+
         ]
     },
     { name: 'notfound', path: '/notfound', component: NotFound },

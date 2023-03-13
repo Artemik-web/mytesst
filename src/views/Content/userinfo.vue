@@ -15,9 +15,32 @@
             <el-button type="primary" class="avatar">修改头像</el-button>
           </el-upload>
 
-          <el-button class="psd">重置密码</el-button>
+          <el-button class="psd" @click="pass = true">重置密码</el-button>
         </div>
-        <button @click="logout">退出</button>
+        <div class="avatarList">
+          <el-button @click="viewAddFun">新增文章分类</el-button>
+          <div class="formlist" v-if="viewAdd">
+            <el-input v-model="addArticinfo.name"></el-input>
+            <el-input v-model="addArticinfo.alias"></el-input>
+            <el-button @click="addArticclassify">提交</el-button>
+          </div>
+          <el-menu active-text-color="#ffd04b" background-color="#545c64" class="el-menu-vertical-demo" default-active="2"
+            text-color="#fff">
+            <el-sub-menu index="1">
+              <template #title>
+                <span>Navigator One</span>
+              </template>
+              <el-menu-item-group title="Group One">
+                <el-menu-item :key="index" :index="`1-${index + 1}}`" v-for="(item, index) in articClassify.data">
+                  <el-tooltip class="box-item" effect="dark" content="Top Left prompts info" placement="top-start">
+                    {{ item.name }} <el-button>删除</el-button>
+                  </el-tooltip>
+                </el-menu-item>
+              </el-menu-item-group>
+            </el-sub-menu>
+          </el-menu>
+        </div>
+        <el-button style="background-color: #409EFF;margin-left: 10px;color: white;" @click="logout">退出</el-button>
       </div>
       <div class="article_box">
         <ul>
@@ -29,23 +52,11 @@
         </ul>
       </div>
     </div>
-    <el-dialog v-model="dialogVisible" title="第一次登录请您先设置您的账号信息" :close-on-click-modal="false" :show-close="false"
-      :close-on-press-escape="false">
-      <el-form :rules="rules" ref="ruleFrom" :model="formData" label-width="80px">
-        <el-form-item label="昵称：" prop="nickname">
-          <el-input v-model="formData.userInfo.nickname" required></el-input>
-        </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="formData.userInfo.email"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="onSubmit">提交</el-button>
-        </el-form-item>
-      </el-form>
-    </el-dialog>
+    <Dialog_form :formData="formData.userInfo" :viewIf="viewIf" @onSubmit="onSubmit"></Dialog_form>
   </div>
 </template>
 <script>
+import Dialog_form from "../../component/dialog_form.vue";
 import { useStore } from "vuex";
 import { removeToken } from "../../untils/setToken";
 import router from "../../router";
@@ -54,42 +65,61 @@ import { reactive, ref } from "vue";
 import { getUserinfo } from "../../api/getUserinfo";
 import { updateUserinfo } from "../../api/updateUserinfo";
 import { updateAvatar } from "../../api/updateAvatar";
+import { updatePasd } from "../../api/updatePsd";
+import { getClassify } from "../../api/getClassify"
+import { addClassify } from "../../api/addClassify"
+// import Dialog from '@/component/dialog.vue'
 export default {
+  components: {
+    Dialog_form
+  },
   setup() {
+    let viewIf = ref(false)
     const store = useStore();
+    const userData = reactive({})
     //定义reactive类型响应数据来接受getuserInfo()得到的user数据
-    let userData = reactive({ data: [] });
-    let dialogVisible = ref(false);
     let formData = reactive({
       userInfo: {
-        nickname: "",
-        // gender:'1',
-        // birthday: '',
-        email: "",
-      },
-      updatePsd: {
-        oldPwd: "",
-        newPwd: ""
+        // 得到的数据都在传入对象的最外层,b变量名为对应prop
+        title: '111',
+        items: [
+          {
+            type: 'Input',
+            label: '昵称',
+            prop: 'nickname',
+            rules: [
+              { required: true, message: '昵称必填' }
+          ]
+          },
+          {
+            type: 'Input',
+            label: '邮箱',
+            prop: 'email',
+            rules: [{ required: true, message: '邮箱必填' },
+            {pattern: /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/ , message: '请输入正确的邮箱账号'}
+          ]
+          },
+        ],
+        btn: [
+          { funName: 'onSubmit', label: '提交' },
+          { funName: 'cancle', label: '取消' }
+        ]
       }
-
-    });
+    })
+    const pass = ref(false)
+    //密码更改函数
+    const updatePsd = () => {
+      // dialogVisible.value = false
+      console.log(formData.updatePsd.items[0].data, formData.updatePsd.items[1].data)
+      updatePasd({
+        oldPwd: formData.updatePsd.items[0].data,
+        newPwd: formData.updatePsd.items[1].data
+      }).then(res => {
+        console.log(res)
+      })
+    }
     const ruleFrom = ref(null);
-    let rules = {
-      nickname: [
-        {
-          required: true,
-          message: "请填写昵称",
-        },
-      ],
-      email: [
-        {
-          required: true,
-          pattern: /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/,
-          message: "请填写正确的邮箱",
-        },
-      ],
-    };
-
+    //头像修改函数
     //头像文件上传转为base64编码后上传
     const changeAvatar = (file) => {
       const reader = new FileReader();
@@ -109,6 +139,7 @@ export default {
       //转base64
       // console.log(reader.result);
     };
+    //用户信息获取函数
     //页面创建前获取用户信息
     let avatarImg = ref("");
     function getinfo() {
@@ -116,40 +147,35 @@ export default {
         userData.data = res.data.data;
         avatarImg.value = res.data.data.user_pic || "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
         store.state.username = res.data.data.username;
-
+console.log(res.data.data.nickname)
         if (!res.data.data.nickname) {
-          dialogVisible.value = true;
+          viewIf.value = true;
+          console.log(1111)
+        }else{
+          viewIf.value = false;
+          console.log(222,viewIf.value)
         }
+        
+        getArticclassify()
         // console.log(userData)
       });
     }
     getinfo();
-    // console.log(userData)
-    // // //从vuex仓库中取数据
-
-    // const res = computed(()=>{
-    //     return store.state.islogin
-    // })
-    // console.log(store.state.islogin)
-    //更新用户信息
-    const onSubmit = () => {
-      ruleFrom.value.validate((valid) => {
-        if (valid) {
+    //第一次登陆时更新用户信息
+    //更新用户信息函数
+    const onSubmit = (data) => {
           updateUserinfo({
-            nickname: formData.userInfo.nickname,
-            email: formData.userInfo.email,
+            nickname: data.nickname,
+            email: data.email,
           })
             .then((res) => {
-              userData.data.nickname = formData.userInfo.nickname;
-              userData.data.email = formData.userInfo.email;
-              dialogVisible.value = false;
-              console.log("dialogVisible", res);
+              getinfo()
+              console.log(res)
+              
             })
             .catch((error) => {
               return error;
             });
-        }
-      });
     };
 
     //退出登录请求函数
@@ -165,15 +191,49 @@ export default {
     };
     // userData.data.token = getToken('PB_token')
     // console.log(userData.data.token);
+
+    //获取用户文章分类函数
+    let articClassify = reactive({
+      data: []
+    })
+    const getArticclassify = () => {
+      getClassify().then(res => {
+        articClassify.data = res.data.data
+        console.log(articClassify)
+      })
+    }
+    //增加文章分类
+    let viewAdd = ref(false)
+    let addArticinfo = reactive({
+      name: '',
+      alias: ''
+    })
+    const viewAddFun = () => {
+      viewAdd.value = !(viewAdd.value)
+    }
+    const addArticclassify = () => {
+      addClassify(addArticinfo).then(res => {
+
+        console.log(res)
+        getArticclassify()
+      })
+    }
     return {
       avatarImg,
-      changeAvatar,
+      articClassify,
       userData,
       formData,
-      rules,
       ruleFrom,
+      pass,
+      viewIf,
+      viewAdd,
+      addArticinfo,
+      viewAddFun,
       onSubmit,
-      dialogVisible,
+      updatePsd,
+      getArticclassify,
+      addArticclassify,
+      changeAvatar,
       logout,
     };
   },
@@ -228,4 +288,5 @@ export default {
       }
     }
   }
-}</style>
+}
+</style>
