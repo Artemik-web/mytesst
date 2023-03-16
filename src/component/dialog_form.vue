@@ -1,12 +1,12 @@
 <template>
   <div class="dialog">
-    <el-dialog v-model="dialogVisible" :title="data.title"  :close-on-press-escape="false">
+    <el-dialog v-model="dialogVisible" :title="data.title" :show-close="false" :close-on-press-escape="false">
       <el-form :model="data" ref="ruleForms">
 
         <!-- input -->
         <div :key="index" v-for="(item, index) in data.items">
           <el-form-item v-if="item.type == 'Input'" :prop="item.prop" :label="item.label" :rules="item.rules">
-            <el-input :validate-event="false" v-model="data[item.prop]"></el-input>
+            <el-input :disabled="item.isDisable" :validate-event="false" v-model="data[item.prop]"></el-input>
           </el-form-item>
         </div>
         <!-- select -->
@@ -49,7 +49,7 @@
       <!-- textarea -->
       <div :key="index" v-for="(item, index) in data.items">
         <el-form-item v-if="item.type == 'Textarea'" :label="item.label" :prop="item.prop" :rules="item.rules">
-          <el-input  :validate-event="false" v-model="data[item.prop]" type="textarea" />
+          <el-input :validate-event="false" v-model="data[item.prop]" type="textarea" />
         </el-form-item>
       </div>
       <!-- button -->
@@ -59,15 +59,12 @@
           <el-button @click="onClick(item.funName)">{{ item.label }}</el-button>
         </div>
       </div>
-
-
-
     </el-dialog>
   </div>
 </template>
 <script>
 //dialog组件数据模板
-{/* <Dialog :formData="formData.userInfo" @onSubmit="onSubmit" @cancle="cancle"></Dialog> */}
+{/* <Dialog :formData="formData.userInfo" @onSubmit="onSubmit" @cancle="cancle"></Dialog> */ }
 // let formData = reactive({
 //             userInfo: {
 //                 // 得到的数据都在传入对象的最外层,b变量名为对应prop
@@ -151,27 +148,27 @@ export default {
     // refFun: Function
   },
   setup(props, context) {
-    
+
     const ruleForms = ref(null)
     let data = reactive({})
     data = reactive(props.formData)
     let dialogVisible = ref(props.viewIf)
     const onClick = async (funName) => {
       if (funName !== 'cancle' && funName !== 'close') {
-        console.log(ruleForms.value.validate)
         await ruleForms.value.validate((valid) => {
           if (valid) {
             context.emit(`${funName}`, data)
-            dialogVisible.value = false
+            ruleForms.value.resetFields()
           } else {
             ElMessage({ message: '数据校验不通过', type: 'error' })
           }
         });
-      }
-      else {
+      } else {
+        context.emit(`${funName}`, data)
         ruleForms.value.resetFields()
-        dialogVisible.value = false
       }
+
+
       //父组件函数形式
       // const onSubmit = (data) => {
       //       // console.log( rulesForm.value)

@@ -12,7 +12,7 @@ const httpinsatnce = axios.create({
     headers: {
 		// 设置后端需要的传参类型
 		'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
-        'PB_token': localStorage.getItem('PB_token')
+        // 'PB_token': localStorage.getItem('PB_token')
 	},
 })
 

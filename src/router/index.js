@@ -8,11 +8,13 @@ import { ElMessage } from 'element-plus'
 const NotFound = () => import('../views/NotFound.vue')
 const Home = () => import('../views/Home.vue')
 const Content = () => import('../views/Content.vue')
-const userinfo = () => import('../views/Content/userinfo.vue')
 const square = () => import('../views/Content/square.vue')
+const userinfo = () => import('../views/Content/userinfo.vue')
+const addArticle = () => import('../views/Content/addArticle.vue')
+
 const routes = [
     { path: '/', redirect: '/home', component: Home },
-    { path: '/:catchAll(.*)', redirect: '/notfound', component: NotFound },
+    
     { name: 'home', path: '/home', component: Home },
     { name: 'square', path: '/square', component: square },
     {
@@ -20,10 +22,12 @@ const routes = [
         children: [
             // { name: 'square', path: '/:username/square', component: square },
             { name: 'userinfo', path: '/:username', component: userinfo },
+            { name: 'addArtic', path: '/:username/addArticle', component: addArticle },
 
         ]
     },
     { name: 'notfound', path: '/notfound', component: NotFound },
+    { path: '/:pathMatch(.*)*', redirect: '/notfound', component: NotFound },
 
 
 ]

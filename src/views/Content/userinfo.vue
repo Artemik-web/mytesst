@@ -15,13 +15,13 @@
             <el-button type="primary" class="avatar">修改头像</el-button>
           </el-upload>
 
-          <el-button class="psd" @click="pass = true">重置密码</el-button>
+          <el-button class="psd" @click="viewPsdClick">重置密码</el-button>
         </div>
         <div class="avatarList">
           <el-button @click="viewAddFun">新增文章分类</el-button>
           <div class="formlist" v-if="viewAdd">
-            <el-input v-model="addArticinfo.name"></el-input>
-            <el-input v-model="addArticinfo.alias"></el-input>
+            <el-input style="width: 200px;display: block;" v-model="addArticinfo.name"></el-input>
+            <el-input style="width: 200px;display: block;" v-model="addArticinfo.alias"></el-input>
             <el-button @click="addArticclassify">提交</el-button>
           </div>
           <el-menu active-text-color="#ffd04b" background-color="#545c64" class="el-menu-vertical-demo" default-active="2"
@@ -31,11 +31,13 @@
                 <span>Navigator One</span>
               </template>
               <el-menu-item-group title="Group One">
-                <el-menu-item :key="index" :index="`1-${index + 1}}`" v-for="(item, index) in articClassify.data">
-                  <el-tooltip class="box-item" effect="dark" content="Top Left prompts info" placement="top-start">
-                    {{ item.name }} <el-button>删除</el-button>
-                  </el-tooltip>
-                </el-menu-item>
+                <div :key="index" v-for="(item, index) in articClassify.data" style="padding: 0 10px">
+                  <el-menu-item style="display:inline-block; width: 200px;" :index="`1-${index + 1}}`">
+                    {{ item.name }}
+                  </el-menu-item>
+                  <el-button style="display:inline-block" @click="viewArticCate(item)">查看</el-button>
+                  <el-button style="display:inline-block" @click="deleteArticCate(item.Id)">删除</el-button>
+                </div>
               </el-menu-item-group>
             </el-sub-menu>
           </el-menu>
@@ -43,6 +45,7 @@
         <el-button style="background-color: #409EFF;margin-left: 10px;color: white;" @click="logout">退出</el-button>
       </div>
       <div class="article_box">
+        <el-button @click="jumpToAdd">写文章</el-button>
         <ul>
           <li></li>
           <li></li>
@@ -52,7 +55,26 @@
         </ul>
       </div>
     </div>
-    <Dialog_form :formData="formData.userInfo" :viewIf="viewIf" @onSubmit="onSubmit"></Dialog_form>
+    <el-dialog :show-close="false" v-model="viewArticCateData" title="当前文章分类信息">
+      <el-form :model="currentData.data" ref="articRefvalid">
+        <el-form-item label="文章分类名" prop="name" :rules="[{ required: true, message: '不能为空' }]">
+          <el-input v-model="currentData.data.name"></el-input>
+        </el-form-item>
+        <el-form-item label="文章分类ID"  prop="Id"  :rules="[{ required: true, message: '不能为空' }]">
+          <el-input :disabled="true" v-model="currentData.data.Id"></el-input>
+        </el-form-item>
+        <el-form-item label="文章分类代码"  prop="alias" :rules="[{ required: true, message: '不能为空' }]">
+          <el-input v-model="currentData.data.alias"></el-input>
+        </el-form-item>
+        <el-form-item label="是否被删除"  prop="is_delete" :rules="[{ required: true, message: '不能为空' }]">
+          <el-input :disabled="true" v-model="currentData.data.is_delete"></el-input>
+        </el-form-item>
+      </el-form>
+      <el-button @click="updateArticCate">提交</el-button>
+    </el-dialog>
+    <Dialog_form v-if="viewIf" :formData="formData.userInfo" :viewIf="viewIf" @onSubmit="onSubmit"></Dialog_form>
+    <Dialog_form v-if="viewPsd" :formData="formData.updatePassword" :viewIf="viewPsd" @updatePsd="updatePsd"
+      @cancle="cancle"></Dialog_form>
   </div>
 </template>
 <script>
@@ -68,6 +90,8 @@ import { updateAvatar } from "../../api/updateAvatar";
 import { updatePasd } from "../../api/updatePsd";
 import { getClassify } from "../../api/getClassify"
 import { addClassify } from "../../api/addClassify"
+import { deleteCate } from "../../api/deleteCate"
+import { uplateArticCate } from "../../api/uplateArticCate"
 // import Dialog from '@/component/dialog.vue'
 export default {
   components: {
@@ -81,7 +105,7 @@ export default {
     let formData = reactive({
       userInfo: {
         // 得到的数据都在传入对象的最外层,b变量名为对应prop
-        title: '111',
+        title: '第一次登陆请先填写个人信息',
         items: [
           {
             type: 'Input',
@@ -89,34 +113,71 @@ export default {
             prop: 'nickname',
             rules: [
               { required: true, message: '昵称必填' }
-          ]
+            ]
           },
           {
             type: 'Input',
             label: '邮箱',
             prop: 'email',
             rules: [{ required: true, message: '邮箱必填' },
-            {pattern: /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/ , message: '请输入正确的邮箱账号'}
-          ]
+            { pattern: /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/, message: '请输入正确的邮箱账号' }
+            ]
           },
         ],
         btn: [
           { funName: 'onSubmit', label: '提交' },
+        ]
+      },
+      updatePassword: {
+        title: '密码修改',
+        items: [
+          {
+            type: 'Input',
+            label: '原密码',
+            prop: 'oldPwd',
+            rules: [
+              { required: true, message: '请输入原密码' }
+            ]
+          },
+          {
+            type: 'Input',
+            label: '新密码',
+            prop: 'newPwd',
+            rules: [
+              { required: true, message: '请输入新密码' }
+            ]
+          },
+        ],
+        btn: [
+          { funName: 'updatePsd', label: '提交' },
           { funName: 'cancle', label: '取消' }
         ]
-      }
+      },
+
     })
-    const pass = ref(false)
     //密码更改函数
-    const updatePsd = () => {
-      // dialogVisible.value = false
-      console.log(formData.updatePsd.items[0].data, formData.updatePsd.items[1].data)
+    let viewPsd = ref(false)
+    const viewPsdClick = () => {
+      viewPsd.value = true
+    }
+    const updatePsd = (data) => {
       updatePasd({
-        oldPwd: formData.updatePsd.items[0].data,
-        newPwd: formData.updatePsd.items[1].data
+        oldPwd: data.oldPwd,
+        newPwd: data.newPwd
       }).then(res => {
-        console.log(res)
+        if (!res.data.status) {
+          ElMessage({ message: '密码修改成功!', type: 'success' })
+          viewPsd.value = false
+          console.log(res)
+        } else {
+          ElMessage({ message: res.data.message, type: 'error' })
+        }
+
       })
+    }
+    const cancle = () => {
+      viewPsd.value = false
+      viewIf.value = false
     }
     const ruleFrom = ref(null);
     //头像修改函数
@@ -147,15 +208,13 @@ export default {
         userData.data = res.data.data;
         avatarImg.value = res.data.data.user_pic || "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
         store.state.username = res.data.data.username;
-console.log(res.data.data.nickname)
+        console.log(res.data.data.nickname)
         if (!res.data.data.nickname) {
           viewIf.value = true;
-          console.log(1111)
-        }else{
+        } else {
           viewIf.value = false;
-          console.log(222,viewIf.value)
         }
-        
+
         getArticclassify()
         // console.log(userData)
       });
@@ -164,18 +223,18 @@ console.log(res.data.data.nickname)
     //第一次登陆时更新用户信息
     //更新用户信息函数
     const onSubmit = (data) => {
-          updateUserinfo({
-            nickname: data.nickname,
-            email: data.email,
-          })
-            .then((res) => {
-              getinfo()
-              console.log(res)
-              
-            })
-            .catch((error) => {
-              return error;
-            });
+      updateUserinfo({
+        nickname: data.nickname,
+        email: data.email,
+      })
+        .then((res) => {
+          getinfo()
+          console.log(res)
+
+        })
+        .catch((error) => {
+          return error;
+        });
     };
 
     //退出登录请求函数
@@ -213,10 +272,64 @@ console.log(res.data.data.nickname)
     }
     const addArticclassify = () => {
       addClassify(addArticinfo).then(res => {
-
-        console.log(res)
         getArticclassify()
+        return res
       })
+    }
+    //根据id删除文章分类
+    const deleteArticCate = (data) => {
+      deleteCate({
+        id: data
+      }).then(res => {
+        getArticclassify()
+        return res
+      }).catch(err => {
+        return err
+      })
+    }
+    //更新文章分类名称&&查看文章分类信息
+    let viewArticCateData = ref(false)
+    let currentData = reactive({
+      data: []
+    })
+    const articRefvalid = ref(null)
+    const oldData = reactive({
+      data: []
+    })
+    const viewArticCate = (data) => {
+      currentData.data = data
+      console.log(currentData)
+      oldData.data = {
+        name: currentData.data.name,
+        alias: currentData.data.alias
+      }
+      viewArticCateData.value = true
+      console.log(viewArticCateData.value)
+    }
+    const updateArticCate = ()=>{
+      articRefvalid.value.validate((valid)=>{
+        if(valid && oldData.data.name !== currentData.data.name || oldData.data.alias !== currentData.data.alias){
+          uplateArticCate({
+            Id: currentData.data.Id,
+            name: currentData.data.name,
+            alias: currentData.data.alias,
+          }).then(res=>{
+            if(res.data.status !== 0){
+              ElMessage({message: res.data.message, type: 'error'})
+            }else{
+              console.log(oldData)
+              ElMessage({message: res.data.message, type: 'success'})
+              viewArticCateData.value = false
+            }
+          })
+        }else{
+          ElMessage({message: '数据没有发生更改,无需提交', type: 'error'})
+        }
+      })
+    }
+    const jumpToAdd = ()=>{
+      console.log(userData)
+      router.push(`/${userData.data.username}/addArticle`)
     }
     return {
       avatarImg,
@@ -224,16 +337,26 @@ console.log(res.data.data.nickname)
       userData,
       formData,
       ruleFrom,
-      pass,
       viewIf,
+      viewPsd,
       viewAdd,
       addArticinfo,
+      viewArticCateData,
+      currentData,
+      articRefvalid,
+      oldData,
+      viewPsdClick,
       viewAddFun,
       onSubmit,
       updatePsd,
+      cancle,
       getArticclassify,
       addArticclassify,
+      deleteArticCate,
+      viewArticCate,
+      updateArticCate,
       changeAvatar,
+      jumpToAdd,
       logout,
     };
   },
@@ -242,8 +365,9 @@ console.log(res.data.data.nickname)
 <style lang="scss" scoped>
 .container {
   .userInfo {
-    float: left;
+    width: 500px;
     height: 2000px;
+    float: left;
     border-radius: 10px;
     // background: rgba($color: #175ed0, $alpha: 0.5);
     background-color: wheat;

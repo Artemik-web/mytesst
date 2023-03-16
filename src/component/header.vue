@@ -2,8 +2,8 @@
     <div class="header">
         <ul class="headerbox">
             <li class="logo_li"><a href="https://www.baidu.com" class="logo"></a></li>
-            <li><router-link class="router" :class="active.class.square" to="/square">广场</router-link></li>
-            <li><router-link class="router" :class="active.class.blog" :to="`/${username}`">我的博客</router-link></li>
+            <li><router-link class="router" active-class="square" to="/square" exact>广场</router-link></li>
+            <li><router-link class="router" active-class="blog" :to="`/${username}`" exact>我的博客</router-link></li>
 
             <!-- <img class="header_avatar" :src="avatarImg" alt=""> -->
         </ul>
@@ -20,7 +20,7 @@ export default {
         const active = reactive({
             class: {
                 square: '',
-                blog: ''
+                blog: '',
             }
         })
         const store = useStore()
@@ -28,11 +28,11 @@ export default {
 
         if (router.currentRoute.value.path == '/square') {
             active.class.square = 'square'
-            // console.log('square')
+            console.log('square')
         }
         if (router.currentRoute.value.path == `/${username}`) {
             active.class.blog = 'blog'
-            // console.log('blog')
+            console.log('blog')
         }
         return {
             active,
@@ -80,6 +80,9 @@ export default {
             }
 
             .blog {
+                color: red;
+            }
+            .addArticle {
                 color: red;
             }
         }
