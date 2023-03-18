@@ -27,8 +27,8 @@ export default {
         let route = useRoute()
         let client = new OSS({
             region: 'oss-cn-heyuan',//地域（在创建 Bucket 的时候指定的中心位置），这里可能不知道具体地域怎么填其实就是 oss-cn-中心位置 ，例：region:'oss-cn-chengdu'，chengdu则是创建bucket是指定的位置成都。
-            accessKeyId: 'LTAI5t5mbhTUuFjz3UCZ7drd', //阿里云产品的通用id
-            accessKeySecret: 'vC8SNS6wgpVaYgBzQDNv7rE7rOyiHh',//密钥
+            accessKeyId: '', //阿里云产品的通用id
+            accessKeySecret: '',//密钥
             bucket: 'vue3-my-blog-hartbed' //OSS 存储区域名
         })
         // 编辑器实例，必须用 shallowRef
