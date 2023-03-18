@@ -60,13 +60,13 @@
         <el-form-item label="文章分类名" prop="name" :rules="[{ required: true, message: '不能为空' }]">
           <el-input v-model="currentData.data.name"></el-input>
         </el-form-item>
-        <el-form-item label="文章分类ID"  prop="Id"  :rules="[{ required: true, message: '不能为空' }]">
+        <el-form-item label="文章分类ID" prop="Id" :rules="[{ required: true, message: '不能为空' }]">
           <el-input :disabled="true" v-model="currentData.data.Id"></el-input>
         </el-form-item>
-        <el-form-item label="文章分类代码"  prop="alias" :rules="[{ required: true, message: '不能为空' }]">
+        <el-form-item label="文章分类代码" prop="alias" :rules="[{ required: true, message: '不能为空' }]">
           <el-input v-model="currentData.data.alias"></el-input>
         </el-form-item>
-        <el-form-item label="是否被删除"  prop="is_delete" :rules="[{ required: true, message: '不能为空' }]">
+        <el-form-item label="是否被删除" prop="is_delete" :rules="[{ required: true, message: '不能为空' }]">
           <el-input :disabled="true" v-model="currentData.data.is_delete"></el-input>
         </el-form-item>
       </el-form>
@@ -306,30 +306,36 @@ export default {
       viewArticCateData.value = true
       console.log(viewArticCateData.value)
     }
-    const updateArticCate = ()=>{
-      articRefvalid.value.validate((valid)=>{
-        if(valid && oldData.data.name !== currentData.data.name || oldData.data.alias !== currentData.data.alias){
+    const updateArticCate = () => {
+      articRefvalid.value.validate((valid) => {
+        if (valid && oldData.data.name !== currentData.data.name || oldData.data.alias !== currentData.data.alias) {
           uplateArticCate({
             Id: currentData.data.Id,
             name: currentData.data.name,
             alias: currentData.data.alias,
-          }).then(res=>{
-            if(res.data.status !== 0){
-              ElMessage({message: res.data.message, type: 'error'})
-            }else{
+          }).then(res => {
+            if (res.data.status !== 0) {
+              ElMessage({ message: res.data.message, type: 'error' })
+            } else {
               console.log(oldData)
-              ElMessage({message: res.data.message, type: 'success'})
+              ElMessage({ message: res.data.message, type: 'success' })
               viewArticCateData.value = false
             }
           })
-        }else{
-          ElMessage({message: '数据没有发生更改,无需提交', type: 'error'})
+        } else {
+          ElMessage({ message: '数据没有发生更改,无需提交', type: 'error' })
         }
       })
     }
-    const jumpToAdd = ()=>{
+    const jumpToAdd = () => {
       console.log(userData)
-      router.push(`/${userData.data.username}/addArticle`)
+      router.push({
+        path: `/${userData.data.username}/addArticle`,
+        query: {
+          username: userData.data.username,
+          id: userData.data.id
+        }
+      })
     }
     return {
       avatarImg,
