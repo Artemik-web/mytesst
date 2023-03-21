@@ -46,7 +46,7 @@ export default {
 <style lang="scss" scoped>
 .header {
     position: fixed;
-    // z-index: 9999;
+    z-index: 9999;
     width: 100%;
     background-color: #1956B4;
 

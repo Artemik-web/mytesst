@@ -186,10 +186,10 @@ export default {
       const reader = new FileReader();
       //这句将图片转base64
       reader.readAsDataURL(file.raw);
-      reader.onload = (e) => {
+      reader.onload = () => {
         // 图片转base64完成后返回reader对象
         console.log(reader.result);
-        console.log(e.target.result.url);
+        // console.log(e.target.result.url);
         updateAvatar({
           avatar: reader.result,
         }).then((res) => {

@@ -1,75 +1,103 @@
 @charset "UTF-8";
-*{
+
+* {
   margin: 0;
   padding: 0;
   border: 0;
   box-sizing: border-box;
 }
-html{
+
+html {
   font-size: 10px;
 }
-body{
+
+body {
   font-size: 1.6rem;
   /* font-family: tahoma, arial, "Hiragino Sans GB", "宋体", sans-serif; */
   font-family: 'Times New Roman', Times, serif, arial, "Hiragino Sans GB", "宋体", sans-serif;
   /* background-color: #f2f2f2 !important; */
 }
-ul,ol,dl{
+
+ul,
+ol,
+dl {
   list-style: none;
 }
+
 i,
 s {
   font-style: normal;
   text-decoration: none;
 }
-fieldset,input,img,input,button,textarea{
+
+fieldset,
+input,
+img,
+input,
+button,
+textarea {
   border: none;
   margin: 0;
   padding: 0;
   outline: none;
 }
-a{
-  color:'';
+
+a {
+  color: '';
   text-decoration: none;
 }
-a:hover{
-  color:'';
+
+a:hover {
+  color: '';
 }
-h1,h2,h3,h4,h5,h6{
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: normal;
   font-size: 100%;
 }
+
 /* 浮动 */
-.fl{
+.fl {
   float: left;
 }
-.fr{
+
+.fr {
   float: right;
 }
+
 /* 清除浮动 */
 .clearfix::before,
-.clearfix::after{
+.clearfix::after {
   content: '';
   display: table;
   clear: both;
 }
+
 /* 版心 */
-.w{
-width: 119rem;
-margin: 0 auto;
+.w {
+  width: 119rem;
+  margin: 0 auto;
 }
+
 /* v-html 富文本样式 */
 /* table 样式 */
-table  {
+table {
   border-top: 1px solid #ccc;
   border-left: 1px solid #ccc;
 }
+
 table td,
 table th {
   border-bottom: 1px solid #ccc;
   border-right: 1px solid #ccc;
   padding: 3px 5px;
 }
+
 table th {
   border-bottom: 2px solid #ccc;
   text-align: center;
@@ -77,6 +105,8 @@ table th {
 
 /* blockquote 样式 */
 blockquote {
+  word-wrap: break-word;
+        word-break: break-all;
   display: block;
   border-left: 8px solid #d0e5f2;
   padding: 5px 10px;
@@ -88,6 +118,7 @@ blockquote {
 
 /* code 样式 */
 code {
+  
   display: inline-block;
   *display: inline;
   *zoom: 1;
@@ -95,12 +126,34 @@ code {
   border-radius: 3px;
   padding: 3px 5px;
   margin: 0 3px;
+  /* word-wrap: break-word;
+  word-break: break-all; */
 }
-pre code {
-  display: block;
+
+pre code {display: block;
+  width: auto;
+  overflow-x: scroll;
+  
 }
 
 /* ul ol 样式 */
-ul, ol {
+ul,
+ol {
   margin: 10px 0 10px 20px;
 }
+
+.el-message {
+  z-index: 99999999 !important;
+
+}
+
+img {
+  border: none;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+code{
+  overflow-x: scroll
+}
+;
