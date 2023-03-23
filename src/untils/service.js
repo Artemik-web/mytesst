@@ -8,7 +8,7 @@ import { ElMessage } from 'element-plus'
 import { getToken } from './setToken'
 const httpinsatnce = axios.create({
     baseURL: '/api',
-    timeout: 5000,
+    timeout: 90000,
     headers: {
 		// 设置后端需要的传参类型
 		'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
@@ -51,9 +51,4 @@ httpinsatnce.interceptors.response.use(
         return Promise.reject(error)
     }
 )
-    //post请求
-// export function post(url,data){
-//         return httpinsatnce.post(url, data)
-//     }
-
 export default httpinsatnce

@@ -1,16 +1,16 @@
 <template>
     <div class="container">
         <div class="articleInfo">
-            <el-form>
-                <el-form-item label="文章所属分类:">
+            <el-form ref="articleRef" :model="articleInfo.data">
+                <el-form-item label="文章所属分类:" prop="cate_id" :rules="[{ required: true, message: '请选择文章所属分类' }]">
                     <el-select v-model="articleInfo.data.cate_id" class="m-2" placeholder="请选择" size="large">
                         <el-option v-for="item in articleClassify.data" :key="item.Id" :label="item.name"
                             :value="item.Id" />
                     </el-select>
                 </el-form-item>
-                <el-form-item label="文章封面:">
-                    <el-upload class="avatar-uploader" ref="upload" :limit="1" action="#" :on-change="uploadCover"
-                        :on-exceed="handleExceed" :on-success="uploadSucc" :auto-upload="false" :show-file-list="false">
+                <el-form-item label="文章封面:" required>
+                    <el-upload class="avatar-uploader" accept="image/jpg,image/jpeg,image/png" ref="upload" action="#"
+                        :on-change="uploadCover" :auto-upload="false" :show-file-list="false">
                         <!-- {{ image }} -->
                         <img v-if="true" :src="image" class="avatar" />
 
@@ -25,7 +25,7 @@
         <div class="textBox">
             <Toolbar style="border-bottom: 1px solid #ccc" :editor="editorRef" :defaultConfig="toolbarConfig"
                 :mode="mode" />
-            <input class="title" placeholder="文章标题" v-model="articleInfo.data.title" />
+            <input class="title" placeholder="文章标题" v-model="articleInfo.data.title" required />
             <Editor style="height: 500px; overflow-y: hidden;" v-model="articleInfo.data.content"
                 :defaultConfig="editorConfig" :mode="mode" @onCreated="handleCreated" />
         </div>
@@ -39,6 +39,8 @@
                 </div>
             </div>
         </div> -->
+        <el-button @click="release(1)">发布</el-button>
+        <el-button @click="release(0)">发布</el-button>
     </div>
 </template>
 <script>
@@ -51,17 +53,21 @@ import { onBeforeUnmount, shallowRef, reactive, ref } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 // import service from '@/untils/service'
 import { useRoute } from 'vue-router'
-import { getClassify } from '../../api/getClassify'
-import { ElMessage,  } from 'element-plus'
+import router from '../../../router/index'
+import { getClassify } from '../../../api/getClassify'
+import { addArticle } from '../../../api/addArticle'
+import { ElMessage, } from 'element-plus'
 export default {
     components: { Editor, Toolbar, Plus },
     setup() {
         let articleInfo = reactive({
             data: {
+                // Id: 1,
                 cate_id: null,
                 title: '',
                 content: '',
-                cover_img: ''
+                state: null,
+                cover_img: {}
             }
         })
         const articleClassify = reactive({
@@ -78,7 +84,6 @@ export default {
         //阿里云OSS
         let client = new OSS({
             region: 'oss-cn-heyuan',//地域（在创建 Bucket 的时候指定的中心位置），这里可能不知道具体地域怎么填其实就是 oss-cn-中心位置 ，例：region:'oss-cn-chengdu'，chengdu则是创建bucket是指定的位置成都。
-            
             bucket: 'vue3-my-blog-hartbed' //OSS 存储区域名
         })
         const imageDelete = () => {
@@ -143,7 +148,6 @@ export default {
 
             ]
         })
-        console.log(editorConfig.MENU_CONF['uploadImage'])
         editorConfig.MENU_CONF['uploadImage'] = {
             async customUpload(file, insertFn) {
                 const time = new Date().getTime()
@@ -181,56 +185,84 @@ export default {
 
         //文章信息相关
         //封面上传函数
-        const dialogImageUrl = ref('')
-        const dialogVisible = ref(false)
-        const disabled = ref(false)
-
         let image = ref('')
-        const uploadCover = (file,UploadFiles) => {
-            console.log(UploadFiles)
-            let fileBlob = file.raw ? new Blob([file.raw], { type: 'image/jpeg' }):new Blob([file], { type: 'image/jpeg' })
-            let newFile = new File([fileBlob], '')
-            console.log(newFile)
-            articleInfo.data.cover_img = fileBlob
-            let reader = new FileReader();
-            //这句将图片转base64//异步转化过程
-            // reader.readAsDataURL(file.raw);
-            reader.readAsDataURL(newFile);
-            console.log(reader)
-            reader.onload = () => {
-                // 图片转base64完成后返回reader对象
-                // console.log(reader.result);//base64
-                image.value = reader.result
+        const uploadCover = (file, fileList) => {
+            //清空之前的文件上传框无需设置limit否则不调用onchange函数
+            if (fileList.length > 1) {
+                fileList.splice(0, 1);
+            }
+            if (file.raw.type !== "image/jpg" && file.raw.type !== "image/jpeg" && file.raw.type !== "image/png") {
+                ElMessage({ message: '仅支持上传jpg/jpeg/png格式文件', type: 'error' })
+            } else {
+                console.log(fileList)
+                let fileBlob = new Blob([file.raw], { type: 'image/jpeg' })
+                let newFile = new File([fileBlob], `${file.name}`)
+                let reader = new FileReader();
+                //这句将图片转base64//异步转化过程
+                // reader.readAsDataURL(file.raw);
+                reader.readAsDataURL(newFile);
+                reader.onload = () => {
+                    // 图片转base64完成后返回reader对象
+                    // console.log(reader.result);//base64
+                    image.value = reader.result
+                    // const formData = new FormData()
+                    articleInfo.data.cover_img = fileBlob
+                    // articleInfo.data.cover_img.append('cover_Img',newFile)
+                    // articleInfo.data.cover_img = newFile
+
+                    // console.log(articleInfo.data.cover_img.get('cover_Img'))
+                    // fileBlob.arrayBuffer().then(buffer => {
+                    //     const base64ToBinary = new Uint8Array(buffer)
+                    //     
+                    // });
+
+
+
+                }
 
             }
-            console.log(articleInfo)
-        }
-
-        // const upload = ref();
-        const handleExceed = (file,files) => {
-            console.log(file,files[0])
-            files[0] = file[0]
-            uploadCover(file,files)
 
         }
-        const uploadSucc = (uploadFile)=>{
-            console.log(uploadFile)
+        let articleRef = ref(null)
+        const release = async (status) => {
+            articleInfo.data.state = status ? '已发布' : '草稿'
+            await articleRef.value.validate((valid) => {
+                if (valid && image.value && articleInfo.data.title) {
+                    addArticle(articleInfo.data).then(res => {
+                        ElMessage({ message: res.data.message, type: 'success' })
+                        router.push({
+                            path: `/${route.query.username}/addSuccess`
+                        })
+                    }).catch(err => {
+                        ElMessage({ message: err.message, type: 'error' })
+                    })
+                } else {
+                    if (!valid) {
+                        ElMessage({ message: '请填写文章标题', type: 'error' })
+                    }
+                    if (!image.value) {
+                        ElMessage({ message: '请选择文章封面', type: 'error' })
+                    }
+                    if (!articleInfo.data.title) {
+                        ElMessage({ message: '请填写文章标题', type: 'error' })
+                    }
+
+                }
+            })
+
         }
         return {
-            dialogImageUrl,
-            uploadSucc,
-            handleExceed,
-            dialogVisible,
-            disabled,
             image,
             imageDelete,
             uploadCover,
+            release,
             articleInfo,
             imgObj,
             client,
             editorRef,
             // valueHtml,
             mode: 'default', // 或 'simple'
+            articleRef,
             toolbarConfig,
             editorConfig,
             articleClassify,

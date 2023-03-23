@@ -8,14 +8,16 @@ module.exports = {
         proxy: {
             '/api': {
                 open: true, 
-                target: 'http://47.115.214.138:3007',
+                target: 'http://127.0.0.1:3007',
+                // target: 'http://47.115.214.138:3007',
                 //允许跨域
                 changeOrigin: true,
                 // 是否代理websocket
                 ws: true, 
                 //3 重写路径
                 pathRewrite: {
-                    '^/api': 'http://47.115.214.138:3007'
+                    '^/api': 'http://127.0.0.1:3007'
+                    // '^/api': 'http://47.115.214.138:3007'
                 }
             }
         }

@@ -10,7 +10,8 @@ const Home = () => import('../views/Home.vue')
 const Content = () => import('../views/Content.vue')
 const square = () => import('../views/Content/square.vue')
 const userinfo = () => import('../views/Content/userinfo.vue')
-const addArticle = () => import('../views/Content/addArticle.vue')
+const addArticle = () => import('../views/Content/userinfo/addArticle.vue')
+const addSuccess = () => import('../views/Content/userinfo/addSuccess.vue')
 
 const routes = [
     { path: '/', redirect: '/home', component: Home },
@@ -23,6 +24,7 @@ const routes = [
             // { name: 'square', path: '/:username/square', component: square },
             { name: 'userinfo', path: '/:username', component: userinfo },
             { name: 'addArtic', path: '/:username/addArticle', component: addArticle },
+            { name: 'addSuccess', path: '/:username/addSuccess', component: addSuccess },
 
         ]
     },
