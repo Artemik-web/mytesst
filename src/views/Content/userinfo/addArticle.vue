@@ -1,5 +1,12 @@
 <template>
     <div class="container">
+        <div class="textBox">
+            <Toolbar style="border-bottom: 1px solid #ccc; z-index: 1;" :editor="editorRef" :defaultConfig="toolbarConfig"
+                :mode="mode" />
+            <input class="title" autofocus placeholder="文章标题" v-model="articleInfo.data.title" required />
+            <Editor style="height: 500px; overflow-y: hidden; z-index: 1;" v-model="articleInfo.data.content"
+                :defaultConfig="editorConfig" :mode="mode" @onCreated="handleCreated" />
+        </div>
         <div class="articleInfo">
             <el-form ref="articleRef" :model="articleInfo.data">
                 <el-form-item label="文章所属分类:" prop="cate_id" :rules="[{ required: true, message: '请选择文章所属分类' }]">
@@ -21,14 +28,7 @@
                 </el-form-item>
             </el-form>
         </div>
-        <button @click="imageDelete">Delete</button>
-        <div class="textBox">
-            <Toolbar style="border-bottom: 1px solid #ccc" :editor="editorRef" :defaultConfig="toolbarConfig"
-                :mode="mode" />
-            <input class="title" placeholder="文章标题" v-model="articleInfo.data.title" required />
-            <Editor style="height: 500px; overflow-y: hidden;" v-model="articleInfo.data.content"
-                :defaultConfig="editorConfig" :mode="mode" @onCreated="handleCreated" />
-        </div>
+
 
 
         <!-- <div class="viewBox">
@@ -41,15 +41,15 @@
         </div> -->
         <el-button @click="release(1)">发布</el-button>
         <el-button @click="release(0)">发布</el-button>
+        <el-button @click="imageDelete(imgObj)"></el-button>
     </div>
 </template>
 <script>
 import { Plus } from '@element-plus/icons-vue'
-
 import OSS from 'ali-oss' // 引入阿里oss
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
 // import { Plus } from '@element-plus/icons-vue'
-import { onBeforeUnmount, shallowRef, reactive, ref } from 'vue'
+import { onBeforeUnmount, shallowRef, reactive, ref, watch, onMounted } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 // import service from '@/untils/service'
 import { useRoute } from 'vue-router'
@@ -60,6 +60,67 @@ import { ElMessage, } from 'element-plus'
 export default {
     components: { Editor, Toolbar, Plus },
     setup() {
+        //阿里云OSS
+        let client = new OSS({
+            region: 'oss-cn-heyuan',//地域（在创建 Bucket 的时候指定的中心位置），这里可能不知道具体地域怎么填其实就是 oss-cn-中心位置 ，例：region:'oss-cn-chengdu'，chengdu则是创建bucket是指定的位置成都。
+            bucket: 'vue3-my-blog-hartbed' //OSS 存储区域名
+        })
+        let route = useRoute()
+        //定义一个用来监听文章是否已经发布或者存入草稿的变量来决定如何处理上传文章需要和不需要的图片
+        let imgUseful = ref(null)
+        //监听路由状态,如果刷新或者未更改imgUseful状态的情况下离开则所有上传的图片从图床删除(点击发布和存草稿可改变imguseful状态)
+        // console.log(imgUseful, route)
+        //1.第一种情况点了发布或草稿 那么删除未使用的，即noUse
+        //2.第二种情况没有发布或者草稿页面刷新或者离开了，那么应该删除所有上传的图片
+        // 当参数更改时获取用户信息 
+        let imgObj = []
+        const imageDelete = (data) => {
+            for (let i = 0; i < data.length; i++) {
+                client.delete(data[i])
+            }
+        }
+        watch(
+            imgUseful,
+            async val => {
+                console.log('监听了')
+                let imgpath = []
+                const num = document.getElementsByTagName('img').length - 1
+                for (let i = 0; i < num; i++) {
+                    //提交前获取编辑器内所使用到的图片，接下来需要删除上传了但是没使用的图片
+                    imgpath.push(document.getElementsByTagName('img')[i].src.replace('https://image.personalblog.cn/', ''))
+
+                }
+                if (imgUseful.value == true) {
+
+                    let noUse = imgObj.filter((item) => {
+                        return imgpath.includes(item) == false
+                    })
+                    //如果有未使用的图片就把未使用的从图床中删除
+                    console.log(imgObj)
+                    console.log(imgpath)
+                    console.log(noUse)
+                    if (noUse) imageDelete(noUse)
+                    return val
+                } else {
+                    //如果
+                    console.log('删除所有图片', imgpath)
+                    imageDelete(imgpath)
+                }
+
+            }
+        )
+        const leave = (e) => {
+            if (e) {
+                console.log('请求')
+                return '提示'
+            } else {
+                window.onbeforeunload = null
+            }
+        }
+        onMounted(() => {
+            //刷新或关闭时触发,提示用户离开不保存数据
+            window.onbeforeunload = leave
+        })
         let articleInfo = reactive({
             data: {
                 // Id: 1,
@@ -80,16 +141,7 @@ export default {
             ElMessage({ message: err.data.message, type: 'error' })
             return null
         })
-        let route = useRoute()
-        //阿里云OSS
-        let client = new OSS({
-            region: 'oss-cn-heyuan',//地域（在创建 Bucket 的时候指定的中心位置），这里可能不知道具体地域怎么填其实就是 oss-cn-中心位置 ，例：region:'oss-cn-chengdu'，chengdu则是创建bucket是指定的位置成都。
-            bucket: 'vue3-my-blog-hartbed' //OSS 存储区域名
-        })
-        const imageDelete = () => {
-            client.delete('admin-1-1679275175842')
-            console.log('删除')
-        }
+
         // 编辑器实例，必须用 shallowRef
         const editorRef = shallowRef()
 
@@ -138,32 +190,31 @@ export default {
             const editor = editorRef.value
             if (editor == null) return
             editor.destroy()
+            // 离开页面清除onbeforeunload事件 不然其他页面也会触发
+            window.onbeforeunload = null
         })
-
         const handleCreated = (editor) => {
+            editor.blur()
             editorRef.value = editor // 记录 editor 实例，重要！
         }
-        let imgObj = reactive({
-            data: [
 
-            ]
-        })
+
+
         editorConfig.MENU_CONF['uploadImage'] = {
             async customUpload(file, insertFn) {
                 const time = new Date().getTime()
                 //更改图片名称为用户名加用户id加时间戳防止图床内同名覆盖
                 const fileName = `${route.query.username}-${route.query.id}-${time}`
-                console.log(file.name)
-                console.log(file, insertFn)                 // JS 语法
                 const url = `https://image.personalblog.cn/${fileName}`
                 const alt = '个人博客'
                 const href = `https://image.personalblog.cn/${fileName}`
                 client.put(
                     fileName, file
                 ).then(res => {
-                    console.log(res)
+                    imgObj.push(fileName)
                     //注意在成功后插入不放在client.put内会出现异步insertFn图片地址还未生成
                     insertFn(url, alt, href)
+                    return res
                 }).catch(err => {
                     console.log(err)
                 })
@@ -173,16 +224,6 @@ export default {
             }
 
         }
-        // editorConfig.MENU_CONF['codeSelectLang'] = {
-        //     // 代码语言
-        //     codeLangs: [
-        //         { text: 'CSS', value: 'css' },
-        //         { text: 'HTML', value: 'html' },
-        //         { text: 'XML', value: 'xml' },
-        //         // 其他
-        //     ]
-        // }
-
         //文章信息相关
         //封面上传函数
         let image = ref('')
@@ -203,21 +244,8 @@ export default {
                 reader.readAsDataURL(newFile);
                 reader.onload = () => {
                     // 图片转base64完成后返回reader对象
-                    // console.log(reader.result);//base64
                     image.value = reader.result
-                    // const formData = new FormData()
                     articleInfo.data.cover_img = fileBlob
-                    // articleInfo.data.cover_img.append('cover_Img',newFile)
-                    // articleInfo.data.cover_img = newFile
-
-                    // console.log(articleInfo.data.cover_img.get('cover_Img'))
-                    // fileBlob.arrayBuffer().then(buffer => {
-                    //     const base64ToBinary = new Uint8Array(buffer)
-                    //     
-                    // });
-
-
-
                 }
 
             }
@@ -227,13 +255,17 @@ export default {
         const release = async (status) => {
             articleInfo.data.state = status ? '已发布' : '草稿'
             await articleRef.value.validate((valid) => {
+
                 if (valid && image.value && articleInfo.data.title) {
                     addArticle(articleInfo.data).then(res => {
+                        imgUseful.value = true
+                        console.log(imgUseful.value)
                         ElMessage({ message: res.data.message, type: 'success' })
                         router.push({
                             path: `/${route.query.username}/addSuccess`
                         })
                     }).catch(err => {
+                        console.log('报错', err)
                         ElMessage({ message: err.message, type: 'error' })
                     })
                 } else {
@@ -276,13 +308,13 @@ export default {
 .avatar-uploader .avatar {
     height: 400px;
     width: 600px;
-    background-color: red;
+    background-color: rgb(124, 218, 233);
     display: block;
     border: 2px blue solid;
 }
 
 .container {
-    background: white;
+    // background: white;
 
     // display: flex;
     .avatar-uploader {

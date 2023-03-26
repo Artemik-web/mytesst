@@ -166,7 +166,7 @@ export default{
   background-color: yellow;
   .pc_main {
     height: 100vh;
-    background-color: aqua;
+    background: rgb(134, 144, 206) linear-gradient(to right, rgba(0, 255, 0, 0), rgba(10, 33, 233, 0.5));
     .el-header {
       background-color: beige;
     }

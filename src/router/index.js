@@ -8,16 +8,25 @@ import { ElMessage } from 'element-plus'
 const NotFound = () => import('../views/NotFound.vue')
 const Home = () => import('../views/Home.vue')
 const Content = () => import('../views/Content.vue')
-const square = () => import('../views/Content/square.vue')
+const squareSpace = () => import('../views/Content/squareSpace.vue')
+const square = () => import('../views/Content/square/square.vue')
+const articleDetails = () => import('../views/Content/square/articleDetails.vue')
 const userinfo = () => import('../views/Content/userinfo.vue')
 const addArticle = () => import('../views/Content/userinfo/addArticle.vue')
 const addSuccess = () => import('../views/Content/userinfo/addSuccess.vue')
 
+
 const routes = [
     { path: '/', redirect: '/home', component: Home },
-    
+
     { name: 'home', path: '/home', component: Home },
-    { name: 'square', path: '/square', component: square },
+    {
+        name: 'squareSpace', path: '/square', component: squareSpace,
+        children: [
+            { name: 'square', path: '/square', component: square },
+            { name: 'articleDetails', path: '/square/:articleId', component: articleDetails },
+        ]
+    },
     {
         name: 'userhome', path: '/:username', component: Content,
         children: [
@@ -46,7 +55,7 @@ router.beforeEach((to, from, next) => {
         //那就判断要去的页面是不是home登录
         if (to.path !== '/home') {
             ElMessage({ message: '请先登录账号', type: 'error' })
-            next('/home')
+            next({ name: 'home' })
         }
     }
     //token存在时
@@ -56,10 +65,10 @@ router.beforeEach((to, from, next) => {
         const onlineTime = now - localStorage.getItem('startTime')
         // console.log(onlineTime)
         //1小时内有刷新验证则不退出
-        if (onlineTime > 3600000) {
+        if (onlineTime > 36000000) {
             ElMessage({ message: '长时间未验证账号,请重新登录！', type: 'error' })
             removeToken(['PB_token', 'username', 'startTime'])
-            next('/home')
+            next({ name: 'home' })
         }
         //每次刷新在一小时内就更新startTime
         else {

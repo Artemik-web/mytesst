@@ -179,8 +179,11 @@ export default {
       viewPsd.value = false
       viewIf.value = false
     }
+    
     const ruleFrom = ref(null);
+    
     //头像修改函数
+    let avatarImg = ref("");
     //头像文件上传转为base64编码后上传
     const changeAvatar = (file) => {
       const reader = new FileReader();
@@ -188,21 +191,23 @@ export default {
       reader.readAsDataURL(file.raw);
       reader.onload = () => {
         // 图片转base64完成后返回reader对象
-        console.log(reader.result);
+        // console.log(reader.result);
         // console.log(e.target.result.url);
         updateAvatar({
           avatar: reader.result,
         }).then((res) => {
-          getinfo();
-          console.log(res);
+          avatarImg.value = reader.result;
+          console.log(res,reader.result);
         });
+        
       };
+      
       //转base64
       // console.log(reader.result);
     };
     //用户信息获取函数
     //页面创建前获取用户信息
-    let avatarImg = ref("");
+    
     function getinfo() {
       getUserinfo().then((res) => {
         userData.data = res.data.data;

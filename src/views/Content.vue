@@ -31,11 +31,12 @@ export default{
 .userhome {
 
     .content {
+        // opacity: 0.5;
         width: 1200px;
         height: 100%;
         margin: 0 auto;
         padding-top: 56px;
-        background-color: aqua;
+        background: rgb(134, 144, 206) linear-gradient(to right, rgba(0, 255, 0, 0), rgba(10, 33, 233, 0.5));
     }
 }
 </style>
