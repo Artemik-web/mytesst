@@ -1,6 +1,6 @@
 import service from '@/untils/service'
 export const getCover_img = async (data) => {
-    console.log(data)
+    // console.log(data)
     let imgArray = []
     for (let i = 0; i < data.length; i++) {
         

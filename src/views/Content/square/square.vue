@@ -24,6 +24,7 @@
 </template>
 <script>
 import { reactive, ref } from 'vue'
+import {setSessionStorage,getSessionStorage} from '@/untils/setSession'
 import { getClassify } from '@/api/getClassify'
 import { getAllArticles } from '@/api/getAllArticles'
 import { getCover_img } from '@/api/getCover_img'
@@ -40,15 +41,17 @@ export default {
         let articleData = reactive({
             data: []
         })
-        const tabChange = async (activeName) => {
-            await getCateArticles(activeName.paneName)
+        const tabChange = async (data) => {
+            await getCateArticles(data.paneName)
+            activeName.value = data.paneName
+
         }
-        getClassify().then(res => {
+        getClassify().then(async res => {
+            loading.value = true
             tagData.data = res.data.data
-            activeName.value = tagData.data[0].Id
+            activeName.value =  Number(getSessionStorage('activeName')) || tagData.data[0].Id
             loading.value = false
-            // console.log(activeName.value)
-            getCateArticles(activeName.value)
+            await getCateArticles(activeName.value)
         }).catch(err => {
             console.log(err)
         })
@@ -82,18 +85,19 @@ export default {
         }
         //获取所有的文章函数
         const getCateArticles = (data) => {
-            loading.value = true
+            // loading.value = true
             getAllArticles(data).then(res => {
                 articleData.data = null
                 // console.log(articleData.data)
                 if (res.data.data !== []) {
                     articleData.data = res.data.data
-                    console.log(articleData.data)
+                    // console.log(articleData.data)
                     blobToBase64(articleData.data)
                 } else {
                     nothing.value = true
                 }
-                console.log(articleData.data)
+                // console.log(1111111111,getSessionStorage('activeName'))
+                setSessionStorage('activeName', data)
                 loading.value = false
             }).catch(err => {
                 console.log(err)
@@ -122,9 +126,9 @@ export default {
     height: 100vh;
     overflow-y: auto;
     margin: 0 auto;
-    padding-top: 56px;
+    // padding-top: 56px;
     // padding-right: 6px;
-    background: rgb(134, 144, 206) linear-gradient(to right, rgba(0, 255, 0, 0), rgba(10, 33, 233, 0.5));
+    // background: rgb(134, 144, 206) linear-gradient(to right, rgba(0, 255, 0, 0), rgba(10, 33, 233, 0.5));
 
     .demo-tabs {
         // height: 100vh;
@@ -155,6 +159,7 @@ export default {
             }
 
             .Pb_li:hover,.nothing:hover {
+                cursor: pointer;
                 scale: 1.05;
                 // animation: liHoverScale ease-in;
             }

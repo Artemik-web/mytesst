@@ -4,14 +4,16 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import { removeToken, setToken } from '../untils/setToken'
 import { ElMessage } from 'element-plus'
 
+
 //页面懒加载
 const NotFound = () => import('../views/NotFound.vue')
 const Home = () => import('../views/Home.vue')
-const Content = () => import('../views/Content.vue')
+const contentSpace = () => import('../views/Content.vue')
 const squareSpace = () => import('../views/Content/squareSpace.vue')
 const square = () => import('../views/Content/square/square.vue')
 const articleDetails = () => import('../views/Content/square/articleDetails.vue')
-const userinfo = () => import('../views/Content/userinfo.vue')
+const userInfoSpace = () => import('../views/Content/userInfoSpace.vue')
+const userInfo = () => import('../views/Content/userinfo/userInfo.vue')
 const addArticle = () => import('../views/Content/userinfo/addArticle.vue')
 const addSuccess = () => import('../views/Content/userinfo/addSuccess.vue')
 
@@ -21,22 +23,37 @@ const routes = [
 
     { name: 'home', path: '/home', component: Home },
     {
-        name: 'squareSpace', path: '/square', component: squareSpace,
+        name: 'content', path: '/square', component: contentSpace
+        ,
         children: [
-            { name: 'square', path: '/square', component: square },
-            { name: 'articleDetails', path: '/square/:articleId', component: articleDetails },
-        ]
-    },
-    {
-        name: 'userhome', path: '/:username', component: Content,
-        children: [
-            // { name: 'square', path: '/:username/square', component: square },
-            { name: 'userinfo', path: '/:username', component: userinfo },
-            { name: 'addArtic', path: '/:username/addArticle', component: addArticle },
-            { name: 'addSuccess', path: '/:username/addSuccess', component: addSuccess },
+            {
+                name: 'squareSpace', path: '/square', component: squareSpace,
+                children: [
+                    { name: 'square', path: '/square', component: square },
+                    { name: 'articleDetails', path: '/square/:articleId', component: articleDetails },
+                ]
+            }
+            // {
+            //     name: 'squareSpace', path: '/square', component: squareSpace,
+            //     children: [
+            //         { name: 'articleSquare', path: '/articleSquare', component: square },
+            //         { name: 'articleDetails', path: '/square/:articleId', component: articleDetails },
+            //     ]
+            // }
+            ,
+            {
+                name: 'userInfoSpace', path: '/:username', component: userInfoSpace,
+                children: [
+                    // { name: 'square', path: '/:username/square', component: square },
+                    { name: 'userInfo', path: '/:username', component: userInfo },
+                    { name: 'addArticle', path: '/:username/addArticle', component: addArticle },
+                    { name: 'addSuccess', path: '/:username/addSuccess', component: addSuccess },
 
+                ]
+            },
         ]
     },
+
     { name: 'notfound', path: '/notfound', component: NotFound },
     { path: '/:pathMatch(.*)*', redirect: '/notfound', component: NotFound },
 

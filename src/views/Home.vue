@@ -123,14 +123,14 @@ export default{
             setToken('startTime', new Date().getTime())
             store.state.islogin = true;
             store.state.username = user.username;
-            // console.log(2,store.state)
+            console.log(res)
             ElMessage({
               message: '登录成功!',
               type: 'success'
             })
             //路由跳转
             // $route.params.username
-            router.push({name: 'square'})
+            router.push('/square')
           }
           else{
             ElMessage({

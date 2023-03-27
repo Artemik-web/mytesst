@@ -40,8 +40,7 @@
             </div>
         </div> -->
         <el-button @click="release(1)">发布</el-button>
-        <el-button @click="release(0)">发布</el-button>
-        <el-button @click="imageDelete(imgObj)"></el-button>
+        <el-button @click="release(0)">存草稿</el-button>
     </div>
 </template>
 <script>
@@ -53,9 +52,9 @@ import { onBeforeUnmount, shallowRef, reactive, ref, watch, onMounted } from 'vu
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 // import service from '@/untils/service'
 import { useRoute } from 'vue-router'
-import router from '../../../router/index'
-import { getClassify } from '../../../api/getClassify'
-import { addArticle } from '../../../api/addArticle'
+import router from '@/router/index'
+import { getClassify } from '@/api/getClassify'
+import { addArticle } from '@/api/addArticle'
 import { ElMessage, } from 'element-plus'
 export default {
     components: { Editor, Toolbar, Plus },
@@ -63,6 +62,10 @@ export default {
         //阿里云OSS
         let client = new OSS({
             region: 'oss-cn-heyuan',//地域（在创建 Bucket 的时候指定的中心位置），这里可能不知道具体地域怎么填其实就是 oss-cn-中心位置 ，例：region:'oss-cn-chengdu'，chengdu则是创建bucket是指定的位置成都。
+            // 阿里云账号id
+            accessKeyId: 'LTAI5t7EJ2hGNvwnKxyymNu9',
+            // 对应密钥
+            accessKeySecret: 'qY7mRuiMYNEPDM9StFBO6sRugVp58X',
             bucket: 'vue3-my-blog-hartbed' //OSS 存储区域名
         })
         let route = useRoute()
@@ -197,14 +200,11 @@ export default {
             editor.blur()
             editorRef.value = editor // 记录 editor 实例，重要！
         }
-
-
-
         editorConfig.MENU_CONF['uploadImage'] = {
             async customUpload(file, insertFn) {
                 const time = new Date().getTime()
                 //更改图片名称为用户名加用户id加时间戳防止图床内同名覆盖
-                const fileName = `${route.query.username}-${route.query.id}-${time}`
+                const fileName = `${route.params.username}-${time}`
                 const url = `https://image.personalblog.cn/${fileName}`
                 const alt = '个人博客'
                 const href = `https://image.personalblog.cn/${fileName}`

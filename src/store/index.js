@@ -4,6 +4,7 @@ import { createStore } from "vuex"
 export default createStore({
   //创建数据仓库
   state: {
+    // isloading: false,
     islogin: false,
     // client: window.matchMedia('(min-width: 768px)').matches? 'pc' : 'mobile'
     client: window.matchMedia('(min-width: 768px)').matches? 'pc' : 'mobile',
@@ -12,6 +13,9 @@ export default createStore({
  
   //同步调用
   mutations: {
+    // changeLoading(state, val){
+    //   state.isloading = val
+    // },
     tigger(state,val){
       
       state.client = val

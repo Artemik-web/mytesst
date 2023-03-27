@@ -1,5 +1,6 @@
 <template>
     <div class="header">
+        <!-- <el-progress v-show="isloading" class="loading" :show-text="false" /> -->
         <ul class="headerbox">
             <li class="logo_li"><a href="https://www.baidu.com" class="logo"></a></li>
             <li><router-link class="router" active-class="square" to="/square" exact>广场</router-link></li>
@@ -25,7 +26,7 @@ export default {
         })
         const store = useStore()
         let username = store.state.username || getToken('username')
-
+        // let isLoading = store.state.isLoading
         if (router.currentRoute.value.path == '/square') {
             active.class.square = 'square'
             console.log('square')
@@ -34,7 +35,10 @@ export default {
             active.class.blog = 'blog'
             console.log('blog')
         }
+
+       
         return {
+            // isLoading,
             active,
             username
         }
