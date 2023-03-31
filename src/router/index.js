@@ -47,7 +47,7 @@ const routes = [
                     // { name: 'square', path: '/:username/square', component: square },
                     { name: 'userInfo', path: '/:username', component: userInfo },
                     { name: 'addArticle', path: '/:username/addArticle', component: addArticle },
-                    { name: 'addSuccess', path: '/:username/addSuccess', component: addSuccess },
+                    { name: 'addSuccess', path: '/:username/addArticle/addSuccess', component: addSuccess },
 
                 ]
             },

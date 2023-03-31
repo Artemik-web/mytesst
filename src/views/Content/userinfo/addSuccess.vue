@@ -24,7 +24,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .addSuc {
-    height: 100vh;
+    // height: 100vh;
     background: rgb(134, 144, 206) linear-gradient(to right, rgba(0, 255, 0, 0), rgba(10, 33, 233, 0.5));
 }
 </style>

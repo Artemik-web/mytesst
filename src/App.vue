@@ -59,7 +59,5 @@ export default ({
     transition: all 2s ease;
 }
 
-// #app{
-//     background-color: rgb(0, 30, 255);
-// }
+
 </style>

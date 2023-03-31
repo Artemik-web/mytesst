@@ -89,32 +89,6 @@ $blue: #2b26c3;
 $img-url: "../assets/image/1.jpg";
 $img-url2: "../assets/image/2.jpg";
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-i {
-  opacity: 0;
-  font-size: 18px;
-  color: #fff;
-  will-change: transform;
-  -webkit-transform: scale(0.1);
-  transform: scale(0.1);
-  -webkit-transition: all 0.2s ease;
-  transition: all 0.2s ease;
-}
-
-h2{
-  pointer-events:none;
-}
-
-body {
-  background-color: $bg-color;
-  width: 100vw;
-  height: 100vh;
-}
 
 .container {
   width: 100%;

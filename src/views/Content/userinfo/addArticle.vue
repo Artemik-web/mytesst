@@ -4,7 +4,7 @@
             <Toolbar style="border-bottom: 1px solid #ccc; z-index: 1;" :editor="editorRef" :defaultConfig="toolbarConfig"
                 :mode="mode" />
             <input class="title" autofocus placeholder="文章标题" v-model="articleInfo.data.title" required />
-            <Editor style="height: 500px; overflow-y: hidden; z-index: 1;" v-model="articleInfo.data.content"
+            <Editor style="height: 41.6rem; overflow-y: hidden; z-index: 1;" v-model="articleInfo.data.content"
                 :defaultConfig="editorConfig" :mode="mode" @onCreated="handleCreated" />
         </div>
         <div class="articleInfo">
@@ -62,10 +62,7 @@ export default {
         //阿里云OSS
         let client = new OSS({
             region: 'oss-cn-heyuan',//地域（在创建 Bucket 的时候指定的中心位置），这里可能不知道具体地域怎么填其实就是 oss-cn-中心位置 ，例：region:'oss-cn-chengdu'，chengdu则是创建bucket是指定的位置成都。
-            // 阿里云账号id
-            accessKeyId: 'LTAI5t7EJ2hGNvwnKxyymNu9',
-            // 对应密钥
-            accessKeySecret: 'qY7mRuiMYNEPDM9StFBO6sRugVp58X',
+
             bucket: 'vue3-my-blog-hartbed' //OSS 存储区域名
         })
         let route = useRoute()
@@ -184,6 +181,13 @@ export default {
                         console.log(`${file.name} 上传成功`, res)
                     },
                 },
+                uploadVideo: {
+                    // server: '/api/upload',
+                    // fieldName: `${route.params.username}-${new Date().getTime()}`,
+
+                    // 单个文件的最大体积限制，默认为 10M
+                    maxFileSize: 500 * 1024 * 1024, // 5M
+                },
                 codeSelectLang: {}
             }
 
@@ -223,6 +227,29 @@ export default {
 
             }
 
+        }
+        editorConfig.MENU_CONF['uploadVideo'] = {
+            // 自定义上传
+                async customUpload(file, insertFn) {   
+                    console.log(file,insertFn)                // JS 语法
+                // file 即选中的文件
+                // 自己实现上传，并得到视频 url poster
+                // 最后插入视频
+                const fileName = `${route.params.username}-${new Date().getTime()}`
+                client.put(
+                    fileName, file
+                ).then(res => {
+                    // imgObj.push(fileName)
+                    //注意在成功后插入不放在client.put内会出现异步insertFn图片地址还未生成
+                    const url = `https://image.personalblog.cn/${fileName}`
+                    insertFn(url)
+                    console.log(res)
+                    return res
+                }).catch(err => {
+                    console.log(err)
+                })
+                // insertFn(url, poster)
+            }
         }
         //文章信息相关
         //封面上传函数
@@ -306,8 +333,8 @@ export default {
 
 <style lang="scss" scoped>
 .avatar-uploader .avatar {
-    height: 400px;
-    width: 600px;
+    height: 31.3rem;
+    width: 50rem;
     background-color: rgb(124, 218, 233);
     display: block;
     border: 2px blue solid;
@@ -351,7 +378,7 @@ export default {
             line-height: 8rem;
             font-size: 5rem;
             position: fixed;
-            width: 596px;
+            width: 49.6rem;
         }
 
         .content {

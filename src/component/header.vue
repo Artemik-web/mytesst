@@ -2,9 +2,11 @@
     <div class="header">
         <!-- <el-progress v-show="isloading" class="loading" :show-text="false" /> -->
         <ul class="headerbox">
-            <li class="logo_li"><a href="https://www.baidu.com" class="logo"></a></li>
+            <li class="logo_li"><a href="https://www.baidu.com" class="logo">PERESONAL-BLOG</a></li>
             <li><router-link class="router" active-class="square" to="/square" exact>广场</router-link></li>
             <li><router-link class="router" active-class="blog" :to="`/${username}`" exact>我的博客</router-link></li>
+            <!-- <li @click="goSquare">广场</li>
+            <li @click="goBlog">我的博客</li> -->
 
             <!-- <img class="header_avatar" :src="avatarImg" alt=""> -->
         </ul>
@@ -14,7 +16,8 @@
 <script>
 import { reactive } from 'vue';
 import { useStore } from 'vuex';
-import router from '../router/index'
+// import { useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { getToken } from '../untils/setToken';
 export default {
     setup() {
@@ -25,22 +28,31 @@ export default {
             }
         })
         const store = useStore()
+        let route = useRoute()
+        console.log(route.path)
         let username = store.state.username || getToken('username')
         // let isLoading = store.state.isLoading
-        if (router.currentRoute.value.path == '/square') {
+        if (route.path == '/square') {
             active.class.square = 'square'
             console.log('square')
         }
-        if (router.currentRoute.value.path == `/${username}`) {
+        if (route.path == `/${username}`) {
             active.class.blog = 'blog'
             console.log('blog')
         }
-
-       
+        // const router = useRouter()
+    //    const goSquare = ()=>{
+    //     router.push('/square')
+    //    }
+    //    const goBlog = ()=>{
+    //     router.push(`/${username}`)
+    //    }
         return {
             // isLoading,
             active,
-            username
+            username,
+            // goBlog,
+            // goSquare
         }
     }
 }
@@ -52,7 +64,7 @@ export default {
     position: fixed;
     z-index: 9999;
     width: 100%;
-    background-color: #1956B4;
+    background-color: #8EB3DF;
 
     .headerbox {
         height: 56px;
@@ -60,13 +72,12 @@ export default {
         margin: 0 auto;
         display: flex;
         line-height: 56px;
-        background-color: #1956B4;
 
         .logo {
             display: inline-block;
             width: 120px;
             height: 56px;
-            background-image: url('../assets/image/logo.png');
+            // background-image: url('../assets/image/logo.png');
             background-size: cover;
         }
 
@@ -81,18 +92,20 @@ export default {
             }
 
             .square {
-                color: red;
+                color: #0C2745;
             }
 
             .blog {
-                color: red;
+                color: #0C2745;
             }
             .addArticle {
-                color: red;
+                color: #0C2745;
             }
         }
 
         .logo_li {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            white-space:nowrap;
             padding-right: 50px;
         }
 

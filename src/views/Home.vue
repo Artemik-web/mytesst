@@ -10,7 +10,7 @@
           </el-main>
           <el-footer>Footer</el-footer>
         </el-container>
-        <el-aside class="pc_aside" width="400px">
+        <el-aside class="pc_aside" width="33.3rem">
           Aside
           <!-- 账号密码表单 -->
           <el-form label-width="50px" status-icon>
@@ -165,8 +165,8 @@ export default{
 .pc_container {
   background-color: yellow;
   .pc_main {
-    height: 100vh;
-    background: rgb(134, 144, 206) linear-gradient(to right, rgba(0, 255, 0, 0), rgba(10, 33, 233, 0.5));
+    height: 100%;
+    // background: rgb(134, 144, 206) linear-gradient(to right, rgba(0, 255, 0, 0), rgba(10, 33, 233, 0.5));
     .el-header {
       background-color: beige;
     }
@@ -181,7 +181,7 @@ export default{
     background-color: white;
     .el-form{
       margin: 0 auto;
-      width: 320px;
+      width: 26.6rem;
     }
     .action{
       text-align: center;
@@ -195,7 +195,7 @@ export default{
       background: url('../assets/image/bg-mobile.jpg') no-repeat;
       background-size: cover;
       width: 100%;
-      height: 100vh;
+      // height: 100vh;
       background-color: #00000060;
       text-align: center;
       border-radius: 10px;

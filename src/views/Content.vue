@@ -32,18 +32,14 @@ export default {
 
 </script>
 <style lang="scss" scoped>
-.userhome {
 
+.userhome {
     .content {
         // opacity: 0.5;
-        width: 1200px;
-        height: 100vh;
+        width: 100rem;
         margin: 0 auto;
         padding-top: 56px;
-        // overflow-y: auto;
-        overflow: hidden;
-        background: rgb(134, 144, 206) linear-gradient(to right, rgba(0, 255, 0, 0), rgba(10, 33, 233, 0.5));
-        //淡入淡出
+        // 淡入淡出
         // .page{ 
         //     animation: fadeInAnimation ease 1s; 
         //     animation-iteration-count: 1; 
