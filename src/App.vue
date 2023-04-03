@@ -1,10 +1,11 @@
 <template>
     <div id="app">
-        <router-view v-slot="{ Component }">
+        <!-- <router-view v-slot="{ Component }">
             <keep-alive>
                 <component :is="Component" />
             </keep-alive>
-        </router-view>
+        </router-view> -->
+        <router-view></router-view>
     </div>
 </template>
 <script>
@@ -46,18 +47,19 @@ export default ({
 </script>
 
 <style lang="less" scoped>
-.v-enter-from {
-    transform: translateX(-100%);
-}
 
-.v-enter-to {
-    transform: translateX(0);
+// .v-enter-from {
+//     transform: translateX(-100%);
+// }
 
-}
+// .v-enter-to {
+//     transform: translateX(0);
 
-.v-enter-active {
-    transition: all 2s ease;
-}
+// }
+
+// .v-enter-active {
+//     transition: all 2s ease;
+// }
 
 
 </style>

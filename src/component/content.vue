@@ -91,12 +91,10 @@ $img-url2: "../assets/image/2.jpg";
 
 
 .container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+  // display: flex;
+  // justify-content: center;
+  // align-items: center;
+  // flex-direction: column;
 
   .card {
     position: relative;

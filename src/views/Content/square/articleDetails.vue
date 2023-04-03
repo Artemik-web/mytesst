@@ -26,8 +26,8 @@
 <script>
 import { reactive } from 'vue';
 import { useRoute } from 'vue-router';
-import { getArticleById } from '@/api/getArticleById'
-import { getUserinfoById } from '@/api/getUserinfoById'
+import { getArticleById } from '@/api/articleDetails/getArticleById'
+import { getUserinfoById } from '@/api/articleDetails/getUserinfoById'
 import { setSessionStorage, getSessionStorage } from '@/untils/setSession'
 export default {
     setup() {

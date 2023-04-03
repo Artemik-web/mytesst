@@ -4,9 +4,9 @@
     <div class="common-layout">
       <el-container class="pc_container">
         <el-container class="pc_main">
-          <el-header>Header</el-header>
+          <el-header>PERESONAL-BLOG</el-header>
           <el-main>Main
-            <component :is="HomeConent"></component>
+            <component class="cards" :is="HomeConent"></component>
           </el-main>
           <el-footer>Footer</el-footer>
         </el-container>
@@ -65,10 +65,10 @@
   </div>
 </template>
 <script>
-import HomeConent from '../homecomponent/content.vue'
+import HomeConent from '../component/content.vue'
 import { computed, reactive,toRefs } from 'vue'
 import {useStore} from 'vuex'
-import {login, register} from '../api/register_login'
+import {login, register} from '../api/home/register_login'
 import {setToken} from '../untils/setToken'
 import { ElMessage } from 'element-plus'
 import router from '../router'
@@ -163,15 +163,18 @@ export default{
 </script>
 <style lang="less" scoped>
 .pc_container {
-  background-color: yellow;
   .pc_main {
-    height: 100%;
+    // height: auto;
     // background: rgb(134, 144, 206) linear-gradient(to right, rgba(0, 255, 0, 0), rgba(10, 33, 233, 0.5));
     .el-header {
-      background-color: beige;
+      text-align: center;
+      font-size: 50px;
     }
     .el-main {
-      background-color: rgb(20, 9, 233);
+      height: 100vh;
+      .cards{
+        margin: 0 auto;
+      }
     }
     .el-footer {
       background-color: forestgreen;

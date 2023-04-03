@@ -1,6 +1,5 @@
 <template>
     <div class="header">
-        <!-- <el-progress v-show="isloading" class="loading" :show-text="false" /> -->
         <ul class="headerbox">
             <li class="logo_li"><a href="https://www.baidu.com" class="logo">PERESONAL-BLOG</a></li>
             <li><router-link class="router" active-class="square" to="/square" exact>广场</router-link></li>
@@ -61,14 +60,15 @@ export default {
 
 <style lang="scss" scoped>
 .header {
+
     position: fixed;
-    z-index: 9999;
+    z-index: 1029;
     width: 100%;
     background-color: #8EB3DF;
 
     .headerbox {
         height: 56px;
-        width: 1200px;
+        width: 100rem;
         margin: 0 auto;
         display: flex;
         line-height: 56px;

@@ -3,7 +3,7 @@
     <div class="container">
       <div class="userInfo">
         <ul class="info">
-          <li>头像：<el-avatar :src="avatarImg" /></li>
+          <li>头像：<img class="avatar" :src="avatarImg" /></li>
           <li>昵称：{{ userData.data.nickname }}</li>
           <li>id: {{ userData.data.id }}</li>
           <li>邮箱: {{ userData.data.email }}</li>
@@ -45,27 +45,38 @@
         <el-button style="background-color: #409EFF;margin-left: 10px;color: white;" @click="logout">退出</el-button>
       </div>
       <div class="article_box">
+        <div class="classify">
+          <div class="release" @click="getUserArticle(data = 1)">已发布</div>
+          <div class="draft" @click="getUserArticle(data = 0)">草稿箱</div>
+        </div>
         <el-button @click="jumpToAdd">写文章</el-button>
         <!-- 分割 -->
-        <!-- <ul>
+        <ul class="userArticle">
           <li class="nothing" v-if="nothing">
             这里是知识的荒漠~~~~~
           </li>
 
-          <div class="articleinfo" :key="index" v-for="(item, index) in articleData.data">
-            <li class="Pb_li" @click="goDetails(item.Id)">
+          <div class="articleinfo">
+            <li class="Pb_li" @click="goDetails(item.Id)" :key="index" v-for="(item, index) in userArticle.data">
               <div class="info">
                 <h2>{{ item.title }}</h2>
                 <div class="cont"></div>
               </div>
-
-              <el-image :class="index % 2 == 0 ? 'coverImgLeft' : 'coverImgRight'" v-loading="img_loading"
-                :src="imgBlobUrl.data[index]" alt="个人博客" />
+              <el-image alt="个人博客" />
+              <div class="editor" @click.stop @click="updateArticle(item.Id)" >编辑</div>
+              <div class="delete" @click.stop @click="deleteArticle(item.Id, index)">删除</div>
             </li>
+            <!-- <div class="end" v-if="(nothing !== true)">
+              拼命加载中.......
+            </div> -->
+            <div class="end" v-if="(nothing !== true)">
+              已经到底了~~~
+            </div>
           </div>
 
-        </ul> -->
+        </ul>
         <!-- 分割 -->
+
       </div>
     </div>
     <el-dialog :show-close="false" v-model="viewArticCateData" title="当前文章分类信息">
@@ -97,15 +108,17 @@ import { removeToken } from "@/untils/setToken";
 import { deleteSessionStorage } from "@/untils/setSession";
 import router from "@/router";
 import { ElMessage } from "element-plus";
-import { reactive, ref } from "vue";
-import { getUserinfo } from "@/api/getUserinfo";
-import { updateUserinfo } from "@/api/updateUserinfo";
-import { updateAvatar } from "@/api/updateAvatar";
-import { updatePasd } from "@/api/updatePsd";
-import { getClassify } from "@/api/getClassify"
-import { addClassify } from "@/api/addClassify"
-import { deleteCate } from "@/api/deleteCate"
-import { uplateArticCate } from "@/api/uplateArticCate"
+import { reactive, ref , onBeforeUnmount} from "vue";
+import { getUserinfo } from "@/api/userinfo/getUserinfo";
+import { updateUserinfo } from "@/api/userinfo/updateUserinfo";
+import { updateAvatar } from "@/api/userinfo/updateAvatar";
+import { updatePasd } from "@/api/userinfo/updatePsd";
+import { getClassify } from "@/api/square/getClassify"
+import { addClassify } from "@/api/userinfo/addClassify"
+import { deleteCate } from "@/api/userinfo/deleteCate"
+import { uplateArticCate } from "@/api/userinfo/uplateArticCate"
+import { getUserArticleById } from "@/api/userinfo/getUserArticle"
+import { deleteArticleById } from "@/api/userinfo/deleteArticleById"
 // import Dialog from '@/component/dialog.vue'
 export default {
   components: {
@@ -235,8 +248,11 @@ export default {
         }
 
         getArticclassify()
-        // console.log(userData)
-      });
+        getUserArticle()
+      }).catch(err => {
+        console.log(err)
+      })
+        ;
     }
     getinfo();
     //第一次登陆时更新用户信息
@@ -278,7 +294,7 @@ export default {
     const getArticclassify = () => {
       getClassify().then(res => {
         articClassify.data = res.data.data
-        console.log(articClassify)
+        // console.log(articClassify)
       })
     }
     //增加文章分类
@@ -353,7 +369,101 @@ export default {
         path: `/${userData.data.username}/addArticle`
       })
     }
+
+    let userArticle = reactive({
+      data: []
+    })
+    let nothing = ref(false)
+    let pageNum = 0
+    let state = ''
+    const getUserArticle = (data = 1) => {
+      //默认为已发布
+      state = data ? '已发布' : '草稿'
+      pageNum += 1
+      getUserArticleById({
+        pageNum: pageNum,
+        state,
+      }).then(res => {
+        // console.log(res.data)
+        if (res.data.status !== 1 && res.data.data.length !== 0) {
+          nothing.value = false
+          if (userArticle.data.length == 0) {
+            userArticle.data = res.data.data
+            console.log(userArticle.data)
+
+          } else {
+            userArticle.data.push(...res.data.data)
+            console.log(userArticle.data)
+            scrollStatus.value = false
+          }
+
+
+        } else {
+          if (userArticle.data == []) {
+            nothing.value = true
+          }
+
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    }
+    //文章页跳转
+    const goDetails = (articleId) => {
+      window.open(`/#/${userData.data.username}/${articleId}`, '_blank')
+      // console.log(router)
+    }
+    //滚轮刷新拉新
+    let scrollStatus = ref(false)
+    window.onmousewheel = () => {
+      //文档内容实际高度（包括超出视窗的溢出部分）
+      let scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+      //滚动条滚动距离
+      let scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+      //窗口可视范围高度
+      let clientHeight = window.innerHeight || Math.min(document.documentElement.clientHeight, document.body.clientHeight);
+      //距离底部还有0.8视窗高度距离的时候触发加载
+      // let canset = clientHeight*0.3
+      //定义一个加载状态，防止触发多次拉取
+      //scrollTop*2是为了在缩放的情况下也更好的获取到加载效果
+      if (clientHeight + scrollTop * 1.01 >= scrollHeight) {
+        if (scrollStatus.value == false) {
+          scrollStatus.value = true
+          getUserArticle()
+          console.log(pageNum + 1, "===加载更多内容……===");
+        }
+        return
+
+
+      }
+    }
+    // 销毁监听  (坑：移除监听事件时加true否则销毁不成功)
+    onBeforeUnmount(()=>{
+      window.removeEventListener("onmousewheel",window.onmousewheel,true)
+    })
+    const deleteArticle = (Id, index) => {
+      deleteArticleById(Id).then(res => {
+        userArticle.data.splice(index, 1)
+        console.log(res)
+      }).catch(err => {
+        console.log(err)
+      })
+
+    }
+    const updateArticle = (data)=>{
+      router.push({
+        path: `/${userData.data.username}/updateArticle`,query: {
+          Id: data
+        }
+      })
+    }
     return {
+      getUserArticle,
+      deleteArticle,
+      updateArticle,
+      nothing,
+      goDetails,
+      userArticle,
       avatarImg,
       articClassify,
       userData,
@@ -385,56 +495,212 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.container {
+.homebox {
+  padding-top: 20px;
 
-  // height: 100vh;
-  // overflow: auto;
-  .userInfo {
+  .container {
 
-    width: 41.6rem;
-    height: 2000px;
-    float: left;
-    border-radius: 10px;
-    // background: rgba($color: #175ed0, $alpha: 0.5);
-    background-color: wheat;
+    // height: 100vh;
+    // overflow: auto;
+    .userInfo {
+      width: 41.6rem;
+      height: 70rem;
+      position: fixed;
+      border-radius: 10px;
+      // background: rgba($color: #175ed0, $alpha: 0.5);
+      background-color: rgba($color: #ffffff, $alpha: 0.5);
+      backdrop-filter: blur(0.5);
 
-    .info {
-      padding-top: 30px;
+      .info {
+        padding-top: 30px;
+        .avatar{
+          width: 35px;
+          border-radius: 50%;
+        }
 
-      li {
-        padding-bottom: 15px;
-        padding-left: 8px;
+        li {
+          padding-bottom: 15px;
+          padding-left: 8px;
+        }
+      }
+
+      .action {
+        display: flex;
+        padding: 10px 5px 0;
+
+        .avatar {
+          background-color: #409EFF;
+          color: white;
+        }
+
+        .psd {
+          margin-left: 10px;
+          color: white;
+          background-color: #409EFF;
+        }
       }
     }
 
-    .action {
-      display: flex;
-      padding: 10px 5px 0;
+    .article_box {
+      padding-left: 43.6rem;
+      overflow: hidden;
 
-      .avatar {
-        background-color: #409EFF;
-        color: white;
+      .classify {
+        width: 100%;
+        display: flex;
+
+        .release {
+          width: 50%;
+          line-height: 36px;
+          background-color: #409EFF;
+        }
+
+        .draft {
+          width: 50%;
+          line-height: 36px;
+          background: #a81cce;
+        }
       }
 
-      .psd {
-        margin-left: 10px;
-        color: white;
-        background-color: #409EFF;
-      }
-    }
-  }
+      .userArticle {
 
-  .article_box {
-    overflow: hidden;
+        // width: 1000px;
+        // margin: 0 auto;
+        // text-align: center;
 
-    ul {
-      padding-top: 30px;
+        .nothing {
+          line-height: 260px;
+        }
 
-      li {
-        margin: 0 auto 20px;
-        width: 600px;
-        height: 400px;
-        background-color: blueviolet;
+        .Pb_li,
+        .nothing {
+          text-align: center;
+          width: 41.6rem;
+          height: 21.6rem;
+          border-radius: 20px;
+          margin: 0 auto 30px;
+          background: rgba(255, 255, 255, .5);
+          scale: 1;
+          transition: scale 0.5s;
+          overflow: hidden;
+          backdrop-filter: blur(6px);
+          // background: linear-gradient(to right, rgb(24, 24, 150), rgb(109, 103, 104));
+          // animation: fadeInAnimation ease 1s;
+
+          .info {
+            word-wrap: break-word;
+            line-height: 3rem;
+            text-align: center;
+            width: 100%;
+          }
+
+          .el-image {
+            overflow: hidden;
+            // background: rgb(109, 103, 104);
+            width: 90%;
+            height: 15rem;
+          }
+
+        }
+
+        .Pb_li {
+          position: relative;
+
+          .editor,
+          .delete {
+
+            text-align: center;
+            width: 50px;
+            line-height: 50px;
+            border-radius: 50%;
+            position: absolute;
+            top: calc(50% - 25px);
+            right: calc(50% - 25px);
+            display: none;
+            animation-fill-mode: forwards;
+            // right: calc(50% - 25px);
+          }
+
+          .editor {
+
+            background: rgba($color: #939bf2, $alpha: .5);
+          }
+
+          .delete {
+            background: rgba($color: #ea4c4c, $alpha: .5);
+          }
+        }
+
+        .end {
+          padding: 20px 0;
+          text-align: center;
+        }
+
+        .Pb_li:hover,
+        .nothing:hover {
+          cursor: pointer;
+          scale: 1.05;
+          box-shadow: 1rem 1rem 4.16rem #1956B4;
+
+          // animation: liHoverScale ease-in;
+          .editor {
+            display: block;
+            animation: editor ease 1s;
+            animation-fill-mode: forwards;
+          }
+
+          .delete {
+            display: block;
+            animation: delete ease 1s;
+            animation-fill-mode: forwards;
+          }
+
+          .editor:hover {
+            z-index: 999;
+            background-color: #939bf2;
+          }
+
+          .delete:hover {
+            z-index: 2;
+            background-color: #ea4c4c;
+          }
+        }
+
+        @keyframes editor {
+          0% {
+            opacity: 0;
+            // right: calc(50% - 25px);
+
+          }
+
+          100% {
+            opacity: 1;
+            right: calc(100% - 50px);
+          }
+        }
+
+        @keyframes delete {
+          0% {
+            opacity: 0;
+            // right: calc(50% - 25px);
+
+          }
+
+          100% {
+            opacity: 1;
+            right: 0;
+          }
+        }
+
+        @keyframes liHoverScale {
+          from {
+            scale: 1.0;
+          }
+
+          to {
+            scale: 1.1;
+          }
+        }
       }
     }
   }

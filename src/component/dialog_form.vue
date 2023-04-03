@@ -1,6 +1,6 @@
 <template>
-  <div class="dialog">
-    <el-dialog v-model="dialogVisible" :title="data.title" :show-close="false" :close-on-press-escape="false">
+  <div class="q">
+    <el-dialog class="dialog" v-model="dialogVisible" :title="data.title" :show-close="false" :close-on-press-escape="false">
       <el-form :model="data" ref="ruleForms">
 
         <!-- input -->
@@ -193,7 +193,13 @@ export default {
   }
 }
 </script>
-        const onSubmit = (data) => {
+<style lang="scss" scoped>
+  .dialog{
+    overflow: hidden;
+      width: 20px !important;
+  }
+</style>
+        <!-- const onSubmit = (data) => {
             // console.log( rulesForm.value)
             console.log('子组件调用了父组件的onSubmit')
             alert('子组件调用了父组件的onSubmit')
@@ -202,4 +208,4 @@ export default {
         const cancle = () => {
             console.log('子组件调用了父组件的cancle')
             alert('子组件调用了父组件的cancle')
-        }
+        } -->

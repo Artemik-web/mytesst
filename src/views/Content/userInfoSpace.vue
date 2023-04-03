@@ -1,11 +1,11 @@
 <template>
-  <div>
-    <router-view v-slot="{ Component }">
-      <keep-alive>
-        <component :is="Component" />
-      </keep-alive>
-    </router-view>
-    <!-- <router-view></router-view> -->
+  <div class="userinfoSpace">
+    <!-- <router-view v-slot="{ Component }"> -->
+      <!-- <keep-alive> -->
+        <!-- <component :is="Component" /> -->
+      <!-- </keep-alive> -->
+    <!-- </router-view> -->
+    <router-view></router-view>
   </div>
 </template>
 <script>
@@ -19,3 +19,4 @@ export default {
   }
 }
 </script>
+<style lang="scss" scoped></style>

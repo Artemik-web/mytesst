@@ -39,8 +39,17 @@
                 </div>
             </div>
         </div> -->
-        <el-button @click="release(1)">发布</el-button>
-        <el-button @click="release(0)">存草稿</el-button>
+        <div>
+            <div v-if="viewUpdate" @click="editorUpdate">
+                <el-button>确认更新</el-button>
+            </div>
+            <div v-else>
+                <el-button @click="release(1)">发布</el-button>
+                <el-button @click="release(0)">存草稿</el-button>
+            </div>
+        </div>
+
+
     </div>
 </template>
 <script>
@@ -53,19 +62,51 @@ import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 // import service from '@/untils/service'
 import { useRoute } from 'vue-router'
 import router from '@/router/index'
-import { getClassify } from '@/api/getClassify'
-import { addArticle } from '@/api/addArticle'
+import { getClassify } from '@/api/square/getClassify'
+import { getArticleById } from '@/api/articleDetails/getArticleById'
+import { getCover_img_one } from '@/api/square/getCover_img'
+import { addArticle } from '@/api/userinfo/addArticle/addArticle'
+import { updateArticle } from '@/api/userinfo/addArticle/updateArticle'
 import { ElMessage, } from 'element-plus'
 export default {
     components: { Editor, Toolbar, Plus },
     setup() {
+        let articleInfo = reactive({
+            data: {
+                // Id: 1,
+                cate_id: null,
+                title: '',
+                content: '',
+                state: null,
+                cover_img: {}
+            }
+        })
+        let image = ref('')
+        let route = useRoute()
+        let viewUpdate = route.query.Id
+        // console.log(1111111,route)
+        //判断进入该路由是否携带文章id，如果携带文章id，那么就是文章更新页面，所有的变量由文章id获取的文章内容赋予
+        if (route.query.Id && route.path == `/${route.params.username}/updateArticle`) {
+            console.log(111111, route.query)
+            getArticleById(route.query.Id).then(res => {
+                articleInfo.data = { ...res.data.data }
+                getCover_img_one(articleInfo.data.cover_img).then(res => {
+                    console.log('str', res)
+                    articleInfo.data.cover_img = res
+                    image.value = URL.createObjectURL(res, 'old')
+                })
+                console.log(articleInfo.data)
+            }).catch(err => {
+                console.log(err)
+            })
+        }
         //阿里云OSS
         let client = new OSS({
             region: 'oss-cn-heyuan',//地域（在创建 Bucket 的时候指定的中心位置），这里可能不知道具体地域怎么填其实就是 oss-cn-中心位置 ，例：region:'oss-cn-chengdu'，chengdu则是创建bucket是指定的位置成都。
 
+
             bucket: 'vue3-my-blog-hartbed' //OSS 存储区域名
         })
-        let route = useRoute()
         //定义一个用来监听文章是否已经发布或者存入草稿的变量来决定如何处理上传文章需要和不需要的图片
         let imgUseful = ref(null)
         //监听路由状态,如果刷新或者未更改imgUseful状态的情况下离开则所有上传的图片从图床删除(点击发布和存草稿可改变imguseful状态)
@@ -120,16 +161,6 @@ export default {
         onMounted(() => {
             //刷新或关闭时触发,提示用户离开不保存数据
             window.onbeforeunload = leave
-        })
-        let articleInfo = reactive({
-            data: {
-                // Id: 1,
-                cate_id: null,
-                title: '',
-                content: '',
-                state: null,
-                cover_img: {}
-            }
         })
         const articleClassify = reactive({
             data: []
@@ -194,12 +225,16 @@ export default {
         }
         // 组件销毁时，也及时销毁编辑器
         onBeforeUnmount(() => {
-            const editor = editorRef.value
-            if (editor == null) return
-            editor.destroy()
             // 离开页面清除onbeforeunload事件 不然其他页面也会触发
             window.onbeforeunload = null
+
         })
+        const editorDestroy = () => {
+            const editor = editorRef.value;
+            if (editor == null) return;
+            editor.destroy()
+
+        };
         const handleCreated = (editor) => {
             editor.blur()
             editorRef.value = editor // 记录 editor 实例，重要！
@@ -230,8 +265,8 @@ export default {
         }
         editorConfig.MENU_CONF['uploadVideo'] = {
             // 自定义上传
-                async customUpload(file, insertFn) {   
-                    console.log(file,insertFn)                // JS 语法
+            async customUpload(file, insertFn) {
+                console.log(file, insertFn)                // JS 语法
                 // file 即选中的文件
                 // 自己实现上传，并得到视频 url poster
                 // 最后插入视频
@@ -253,7 +288,6 @@ export default {
         }
         //文章信息相关
         //封面上传函数
-        let image = ref('')
         const uploadCover = (file, fileList) => {
             //清空之前的文件上传框无需设置limit否则不调用onchange函数
             if (fileList.length > 1) {
@@ -288,8 +322,10 @@ export default {
                         imgUseful.value = true
                         console.log(imgUseful.value)
                         ElMessage({ message: res.data.message, type: 'success' })
+                        //编辑器销毁
+                        editorDestroy()
                         router.push({
-                            path: `/${route.query.username}/addSuccess`
+                            path: `/${route.query.username}/addArticle/addSuccess`
                         })
                     }).catch(err => {
                         console.log('报错', err)
@@ -310,8 +346,22 @@ export default {
             })
 
         }
+        const editorUpdate = () => {
+            updateArticle(articleInfo.data).then(res => {
+                ElMessage({message: `${res.data.message}`, type: 'success'})
+                //编辑器销毁
+                editorDestroy()
+                router.push({
+                    path: `/${route.query.username}/addArticle/addSuccess`
+                })
+                
+            }).catch(err => {
+                console.log(err)
+            })
+        }
         return {
             image,
+            viewUpdate,
             imageDelete,
             uploadCover,
             release,
@@ -325,7 +375,8 @@ export default {
             toolbarConfig,
             editorConfig,
             articleClassify,
-            handleCreated
+            handleCreated,
+            editorUpdate
         };
     }
 }
