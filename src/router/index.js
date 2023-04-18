@@ -12,10 +12,13 @@ import 'nprogress/nprogress.css'
 
 //页面懒加载
 const NotFound = () => import('@/views/NotFound.vue')
+const Test = () => import('@/views/Test.vue')
+const Develop = () => import('@/views/Develop.vue')
 const Home = () => import('@/views/Home.vue')
 const contentSpace = () => import('@/views/Content.vue')
 const squareSpace = () => import('@/views/Content/squareSpace.vue')
 const square = () => import('@/views/Content/square/square.vue')
+const Search = () => import('@/views/Content/square/search.vue')
 const articleDetails = () => import('@/views/Content/square/articleDetails.vue')
 const userArticleDetails = () => import('@/views/Content/square/articleDetails.vue')
 const userInfoSpace = () => import('@/views/Content/userInfoSpace.vue')
@@ -28,6 +31,8 @@ const addSuccess = () => import('@/views/Content/userinfo/addSuccess.vue')
 const routes = [
     { path: '/', redirect: '/home', component: Home },
 
+    { name: 'dev', path: '/develop', component: Develop },
+    { name: 'test', path: '/testpage', component: Test },
     { name: 'home', path: '/home', component: Home },
     {
         name: 'content', path: '/square', component: contentSpace
@@ -62,7 +67,7 @@ const routes = [
             },
         ]
     },
-
+    { name: 'search', path: '/search', component: Search },
     { name: 'notfound', path: '/notfound', component: NotFound },
     { path: '/:pathMatch(.*)*', redirect: '/notfound', component: NotFound },
 

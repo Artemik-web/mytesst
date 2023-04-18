@@ -64,7 +64,7 @@ import { useRoute } from 'vue-router'
 import router from '@/router/index'
 import { getClassify } from '@/api/square/getClassify'
 import { getArticleById } from '@/api/articleDetails/getArticleById'
-import { getCover_img_one } from '@/api/square/getCover_img'
+import { getCover_img } from '@/api/square/getCover_img'
 import { addArticle } from '@/api/userinfo/addArticle/addArticle'
 import { updateArticle } from '@/api/userinfo/addArticle/updateArticle'
 import { ElMessage, } from 'element-plus'
@@ -90,10 +90,11 @@ export default {
             console.log(111111, route.query)
             getArticleById(route.query.Id).then(res => {
                 articleInfo.data = { ...res.data.data }
-                getCover_img_one(articleInfo.data.cover_img).then(res => {
+                console.log('原', res.data.data)
+                getCover_img([articleInfo.data]).then(res => {
                     console.log('str', res)
-                    articleInfo.data.cover_img = res
-                    image.value = URL.createObjectURL(res, 'old')
+                    // articleInfo.data.cover_img = res[0].cover_img
+                    image.value = res[0].cover_img
                 })
                 console.log(articleInfo.data)
             }).catch(err => {
@@ -103,7 +104,7 @@ export default {
         //阿里云OSS
         let client = new OSS({
             region: 'oss-cn-heyuan',//地域（在创建 Bucket 的时候指定的中心位置），这里可能不知道具体地域怎么填其实就是 oss-cn-中心位置 ，例：region:'oss-cn-chengdu'，chengdu则是创建bucket是指定的位置成都。
-
+            
 
             bucket: 'vue3-my-blog-hartbed' //OSS 存储区域名
         })
@@ -325,7 +326,7 @@ export default {
                         //编辑器销毁
                         editorDestroy()
                         router.push({
-                            path: `/${route.query.username}/addArticle/addSuccess`
+                            path: `/${route.query.username}/addArticle/addSuccess`,query:{articleId: res.data.articleId}
                         })
                     }).catch(err => {
                         console.log('报错', err)
@@ -346,13 +347,18 @@ export default {
             })
 
         }
+        console.log(route)
         const editorUpdate = () => {
+            console.log(articleInfo.data)
             updateArticle(articleInfo.data).then(res => {
+                console.log(articleInfo.data,route)
                 ElMessage({message: `${res.data.message}`, type: 'success'})
                 //编辑器销毁
                 editorDestroy()
+                let path_username = route.params.username
+                
                 router.push({
-                    path: `/${route.query.username}/addArticle/addSuccess`
+                    path: `/${path_username}/addArticle/addSuccess`,query:{articleId: articleInfo.data.Id}
                 })
                 
             }).catch(err => {
@@ -439,71 +445,71 @@ export default {
         }
     }
 
-    ::v-deep {
+    // ::v-deep {
 
-        img,
-        p,
-        table,
-        span {
-            max-width: 100%;
-        }
+    //     img,
+    //     p,
+    //     table,
+    //     span {
+    //         max-width: 100%;
+    //     }
 
-        blockquote {
-            border-left: 8px solid #d0e5f2;
-            padding: 10px 10px;
-            margin: 10px 0;
-            background-color: #f1f1f1;
-        }
+    //     blockquote {
+    //         border-left: 8px solid #d0e5f2;
+    //         padding: 10px 10px;
+    //         margin: 10px 0;
+    //         background-color: #f1f1f1;
+    //     }
 
-        code {
+    //     code {
 
-            font-family: monospace;
-            background-color: #eee;
-            padding: 3px;
-            border-radius: 3px;
-        }
+    //         font-family: monospace;
+    //         background-color: #eee;
+    //         padding: 3px;
+    //         border-radius: 3px;
+    //     }
 
-        pre>code {
-            ::-webkit-scrollbar {
-                height: 20px;
-                width: 20px !important;
-            }
+    //     pre>code {
+    //         ::-webkit-scrollbar {
+    //             height: 20px;
+    //             width: 20px !important;
+    //         }
 
-            display: block;
-            padding: 10px;
-        }
+    //         display: block;
+    //         padding: 10px;
+    //     }
 
-        table {
-            border-collapse: collapse;
-            overflow-x: auto;
-            display: -webkit-box;
-            -webkit-overflow-scrolling: touch;
-        }
+    //     table {
+    //         border-collapse: collapse;
+    //         overflow-x: auto;
+    //         display: -webkit-box;
+    //         -webkit-overflow-scrolling: touch;
+    //     }
 
-        td,
-        th {
-            border: 1px solid #ccc;
-            min-width: 50px;
-            height: 20px;
-        }
+    //     td,
+    //     th {
+    //         border: 1px solid #ccc;
+    //         min-width: 50px;
+    //         height: 20px;
+    //     }
 
-        th {
-            background-color: #f1f1f1;
-        }
+    //     th {
+    //         background-color: #f1f1f1;
+    //     }
 
-        ul,
-        ol {
-            padding-left: 20px;
-        }
+    //     ul,
+    //     ol {
+    //         padding-left: 20px;
+    //     }
 
-        input[type="checkbox"] {
-            margin-right: 5px;
-        }
+    //     // input[type="checkbox"] {
+    //     //     margin-right: 5px;
+    //     // }
 
-        ul,
-        ol {
-            list-style: revert;
-        }
-    }
+    //     ul,
+    //     ol {
+    //         list-style: revert;
+    //     }
+    // }
 }
 </style>

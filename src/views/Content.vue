@@ -39,7 +39,7 @@ display: none !important;
 .userhome { 
     .content {
         // opacity: 0.5;
-        width: 100rem;
+        max-width: 100rem;
         margin: 0 auto;
         padding-top: 56px;
 

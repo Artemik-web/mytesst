@@ -1,6 +1,6 @@
 <template>
   <div class="q">
-    <el-dialog class="dialog" v-model="dialogVisible" :title="data.title" :show-close="false" :close-on-press-escape="false">
+    <el-dialog class="dialog" v-model="dialogVisible" close-on-click-modal :title="data.title" :show-close="false" :close-on-press-escape="false">
       <el-form :model="data" ref="ruleForms">
 
         <!-- input -->

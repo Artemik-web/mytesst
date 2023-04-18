@@ -38,7 +38,6 @@ html {
 }
 
 body {
-  margint: 0;
   /* padding-right: 6px; */
   font-size: 1.3rem;
   /* font-family: tahoma, arial, "Hiragino Sans GB", "宋体", sans-serif; */
@@ -46,8 +45,8 @@ body {
   /* background-color: #f2f2f2 !important; */
   
 /* 加载背景图 */
-/* background-image: url('https://image.personalblog.cn/admin-1680083054020'); */
-background-image: url('./image/bggezi.jpg');
+background-image: url('https://image.personalblog.cn/admin-1680083054020');
+/* background-image: url('./image/bggezi.jpg'); */
 /* 背景图垂直、水平均居中 */
 background-position: center center;
 /* 背景图不平铺 */
@@ -197,12 +196,12 @@ ol {
 
 }
 
-img {
+/* img {
   padding: 10px 0;
   border: none;
   width: 80rem;
   object-fit: contain;
-}
+} */
 
 video {
   width: 80rem;

@@ -1,23 +1,8 @@
 <template>
-  <div class="homebox" v-if="userData.data">
+  <div class="homebox">
     <div class="container">
-      <div class="userInfo">
-        <ul class="info">
-          <li>头像：<img class="avatar" :src="avatarImg" /></li>
-          <li>昵称：{{ userData.data.nickname }}</li>
-          <li>id: {{ userData.data.id }}</li>
-          <li>邮箱: {{ userData.data.email }}</li>
-        </ul>
-        <div class="action">
-
-          <!-- 默认上传文件格式为file -->
-          <el-upload ref="upload" :auto-upload="false" :show-file-list="false" action="#" :on-change="changeAvatar">
-            <el-button type="primary" class="avatar">修改头像</el-button>
-          </el-upload>
-
-          <el-button class="psd" @click="viewPsdClick">重置密码</el-button>
-        </div>
-        <div class="avatarList">
+      <div class="avatarList">
+          <el-button @click="jumpToAdd">写文章</el-button>
           <el-button @click="viewAddFun">新增文章分类</el-button>
           <div class="formlist" v-if="viewAdd">
             <el-input style="width: 16.6rem;display: block;" v-model="addArticinfo.name"></el-input>
@@ -41,43 +26,10 @@
               </el-menu-item-group>
             </el-sub-menu>
           </el-menu>
+          <user  v-show="client === 'pc'" ref="userRef" @viewinfoClick="viewinfoClick" @viewPsdClick="viewPsdClick"></user>
+          <articleList @goDetails="goDetails" @updateArticle="updateArticle"></articleList>
         </div>
-        <el-button style="background-color: #409EFF;margin-left: 10px;color: white;" @click="logout">退出</el-button>
-      </div>
-      <div class="article_box">
-        <div class="classify">
-          <div class="release" @click="getUserArticle(data = 1)">已发布</div>
-          <div class="draft" @click="getUserArticle(data = 0)">草稿箱</div>
-        </div>
-        <el-button @click="jumpToAdd">写文章</el-button>
-        <!-- 分割 -->
-        <ul class="userArticle">
-          <li class="nothing" v-if="nothing">
-            这里是知识的荒漠~~~~~
-          </li>
 
-          <div class="articleinfo">
-            <li class="Pb_li" @click="goDetails(item.Id)" :key="index" v-for="(item, index) in userArticle.data">
-              <div class="info">
-                <h2>{{ item.title }}</h2>
-                <div class="cont"></div>
-              </div>
-              <el-image alt="个人博客" />
-              <div class="editor" @click.stop @click="updateArticle(item.Id)" >编辑</div>
-              <div class="delete" @click.stop @click="deleteArticle(item.Id, index)">删除</div>
-            </li>
-            <!-- <div class="end" v-if="(nothing !== true)">
-              拼命加载中.......
-            </div> -->
-            <div class="end" v-if="(nothing !== true)">
-              已经到底了~~~
-            </div>
-          </div>
-
-        </ul>
-        <!-- 分割 -->
-
-      </div>
     </div>
     <el-dialog :show-close="false" v-model="viewArticCateData" title="当前文章分类信息">
       <el-form :model="currentData.data" ref="articRefvalid">
@@ -96,37 +48,49 @@
       </el-form>
       <el-button @click="updateArticCate">提交</el-button>
     </el-dialog>
-    <Dialog_form v-if="viewIf" :formData="formData.userInfo" :viewIf="viewIf" @onSubmit="onSubmit"></Dialog_form>
-    <Dialog_form v-if="viewPsd" :formData="formData.updatePassword" :viewIf="viewPsd" @updatePsd="updatePsd"
-      @cancle="cancle"></Dialog_form>
+    <el-dialog :lock-scroll="false" v-model="viewOnce" :title="formData.userInfo.title" :show-close="false"
+      :close-on-press-escape="false">
+      <pb_form ref="user_form" :formData="formData.userInfo"></pb_form>
+      <el-button @click="updateinfo">提交</el-button>
+    </el-dialog>
+    <el-dialog :lock-scroll="false" v-model="viewPsd" :title="formData.updatePassword.title" :close-on-click-modal="false"
+      :close-on-press-escape="false">
+      <pb_form ref="psd_form" :formData="formData.updatePassword"></pb_form>
+      <el-button @click="updatePsd">提交</el-button>
+    </el-dialog>
   </div>
 </template>
 <script>
-import Dialog_form from "@/component/dialog_form.vue";
-import { useStore } from "vuex";
-import { removeToken } from "@/untils/setToken";
-import { deleteSessionStorage } from "@/untils/setSession";
+import { useStore } from 'vuex';
+import user from './userinfoComponent/user.vue'
+import articleList from './userinfoComponent/article_list.vue'
+
+// import Dialog_form from "@/component/dialog_form.vue";
+import pb_form from "@/component/pb_form.vue";
 import router from "@/router";
 import { ElMessage } from "element-plus";
-import { reactive, ref , onBeforeUnmount} from "vue";
-import { getUserinfo } from "@/api/userinfo/getUserinfo";
+import { reactive, ref, onMounted, computed } from "vue";
 import { updateUserinfo } from "@/api/userinfo/updateUserinfo";
-import { updateAvatar } from "@/api/userinfo/updateAvatar";
 import { updatePasd } from "@/api/userinfo/updatePsd";
 import { getClassify } from "@/api/square/getClassify"
 import { addClassify } from "@/api/userinfo/addClassify"
 import { deleteCate } from "@/api/userinfo/deleteCate"
 import { uplateArticCate } from "@/api/userinfo/uplateArticCate"
-import { getUserArticleById } from "@/api/userinfo/getUserArticle"
-import { deleteArticleById } from "@/api/userinfo/deleteArticleById"
 // import Dialog from '@/component/dialog.vue'
 export default {
   components: {
-    Dialog_form
+    // Dialog_form
+    pb_form,
+    user,
+    articleList
   },
   setup() {
-    let viewIf = ref(false)
-    const store = useStore();
+    let store = useStore()
+    let client = computed(()=>{
+      return store.state.client
+    })
+    const userRef = ref('userRef')
+
     const userData = reactive({})
     //定义reactive类型响应数据来接受getuserInfo()得到的user数据
     let formData = reactive({
@@ -150,9 +114,6 @@ export default {
             { pattern: /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/, message: '请输入正确的邮箱账号' }
             ]
           },
-        ],
-        btn: [
-          { funName: 'onSubmit', label: '提交' },
         ]
       },
       updatePassword: {
@@ -174,119 +135,83 @@ export default {
               { required: true, message: '请输入新密码' }
             ]
           },
-        ],
-        btn: [
-          { funName: 'updatePsd', label: '提交' },
-          { funName: 'cancle', label: '取消' }
         ]
       },
 
     })
-    //密码更改函数
+    //密码更改dialog函数
+    let viewOnce = ref(false)
+    const viewinfoClick = (d) => {
+      console.log(d)
+      viewOnce.value = d
+
+    }
+    //密码更改dialog函数
     let viewPsd = ref(false)
     const viewPsdClick = () => {
       viewPsd.value = true
+      // console.log(viewOnce)
     }
-    const updatePsd = (data) => {
-      updatePasd({
-        oldPwd: data.oldPwd,
-        newPwd: data.newPwd
-      }).then(res => {
-        if (!res.data.status) {
-          ElMessage({ message: '密码修改成功!', type: 'success' })
-          viewPsd.value = false
-          console.log(res)
-        } else {
-          ElMessage({ message: res.data.message, type: 'error' })
-        }
-
-      })
-    }
-    const cancle = () => {
-      viewPsd.value = false
-      viewIf.value = false
-    }
-
-    const ruleFrom = ref(null);
-
-    //头像修改函数
-    let avatarImg = ref("");
-    //头像文件上传转为base64编码后上传
-    const changeAvatar = (file) => {
-      const reader = new FileReader();
-      //这句将图片转base64
-      reader.readAsDataURL(file.raw);
-      reader.onload = () => {
-        // 图片转base64完成后返回reader对象
-        // console.log(reader.result);
-        // console.log(e.target.result.url);
-        updateAvatar({
-          avatar: reader.result,
-        }).then((res) => {
-          avatarImg.value = reader.result;
-          console.log(res, reader.result);
-        });
-
-      };
-
-      //转base64
-      // console.log(reader.result);
-    };
-    //用户信息获取函数
-    //页面创建前获取用户信息
-
-    function getinfo() {
-      getUserinfo().then((res) => {
-        userData.data = res.data.data;
-        avatarImg.value = res.data.data.user_pic || "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
-        store.state.username = res.data.data.username;
-        console.log(res.data.data.nickname)
-        if (!res.data.data.nickname) {
-          viewIf.value = true;
-        } else {
-          viewIf.value = false;
-        }
-
-        getArticclassify()
-        getUserArticle()
-      }).catch(err => {
-        console.log(err)
-      })
-        ;
-    }
-    getinfo();
-    //第一次登陆时更新用户信息
-    //更新用户信息函数
-    const onSubmit = (data) => {
-      updateUserinfo({
-        nickname: data.nickname,
-        email: data.email,
-      })
-        .then((res) => {
-          getinfo()
-          console.log(res)
+    //密码dialog密码更改函数
+    const psd_form = ref('psd_form')
+    const updatePsd = () => {
+      psd_form.value.formCheck(() => {
+        let psd_form_data = psd_form.value.Data
+        console.log(psd_form_data)
+        updatePasd({
+          oldPwd: psd_form_data.oldPwd,
+          newPwd: psd_form_data.newPwd
+        }).then(res => {
+          if (res.data.status == 0) {
+            ElMessage({ message: '密码修改成功!', type: 'success' })
+            viewPsd.value = false
+            //表单数据清理
+            psd_form.value.formClear()
+            console.log(res)
+          } else {
+            ElMessage({ message: res.data.message, type: 'error' })
+          }
 
         })
-        .catch((error) => {
-          return error;
-        });
-    };
+      })
 
-    //退出登录请求函数
-    const logout = () => {
-      // console.log(res);
-      //改变登录状态判断
-      store.state.text = false;
-      //清除本地记录的token
-      removeToken(["PB_token", "username", "startTime"]);
-      deleteSessionStorage("activeName")
-      store.state.islogin = false;
-      ElMessage({ message: "退出登录", type: "success" });
-      router.push("/home");
-    };
-    // userData.data.token = getToken('PB_token')
-    // console.log(userData.data.token);
+    }
+    const ruleFrom = ref(null);
+    let user_form = ref('user_form')
+    //写在这里是不行的，setup相当于创建前后这个时候还未挂载user_form.value是没有数据的
+    // let user_form_data = user_form.value.Data
+    //第一次登陆时更新用户信息
+    //更新用户信息函数
+    const updateinfo = () => {
+      console.log(user_form.value)
+      //表单校验函数
+      user_form.value.formCheck(() => {
+        let user_form_data = user_form.value.Data
+        console.log(user_form_data, user_form.value.Data)
+        let data = {
+          nickname: user_form_data.nickname,
+          email: user_form_data.email,
+        }
+        updateUserinfo(data).then((res) => {
+          if (res.data.status == 0) {
+            userRef.value.userData.data.nickname = data.nickname
+            userRef.value.userData.data.email = data.email
+            viewinfoClick(false)
+            user_form.value.formClear()
 
+          } else {
+            ElMessage({ message: res.data.message, type: 'error' })
+          }
+
+
+
+        })
+          .catch((error) => {
+            return error;
+          });
+      })
+
+    };
     //获取用户文章分类函数
     let articClassify = reactive({
       data: []
@@ -363,113 +288,49 @@ export default {
         }
       })
     }
+    //跳转至文章添加页
     const jumpToAdd = () => {
-      console.log(userData)
+
+      let path_username = userRef.value.userData.data.username
       router.push({
-        path: `/${userData.data.username}/addArticle`
+        path: `/${path_username}/addArticle`
       })
     }
 
-    let userArticle = reactive({
-      data: []
-    })
-    let nothing = ref(false)
-    let pageNum = 0
-    let state = ''
-    const getUserArticle = (data = 1) => {
-      //默认为已发布
-      state = data ? '已发布' : '草稿'
-      pageNum += 1
-      getUserArticleById({
-        pageNum: pageNum,
-        state,
-      }).then(res => {
-        // console.log(res.data)
-        if (res.data.status !== 1 && res.data.data.length !== 0) {
-          nothing.value = false
-          if (userArticle.data.length == 0) {
-            userArticle.data = res.data.data
-            console.log(userArticle.data)
-
-          } else {
-            userArticle.data.push(...res.data.data)
-            console.log(userArticle.data)
-            scrollStatus.value = false
-          }
 
 
-        } else {
-          if (userArticle.data == []) {
-            nothing.value = true
-          }
-
-        }
-      }).catch(err => {
-        console.log(err)
-      })
-    }
-    //文章页跳转
-    const goDetails = (articleId) => {
-      window.open(`/#/${userData.data.username}/${articleId}`, '_blank')
-      // console.log(router)
-    }
-    //滚轮刷新拉新
-    let scrollStatus = ref(false)
-    window.onmousewheel = () => {
-      //文档内容实际高度（包括超出视窗的溢出部分）
-      let scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
-      //滚动条滚动距离
-      let scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
-      //窗口可视范围高度
-      let clientHeight = window.innerHeight || Math.min(document.documentElement.clientHeight, document.body.clientHeight);
-      //距离底部还有0.8视窗高度距离的时候触发加载
-      // let canset = clientHeight*0.3
-      //定义一个加载状态，防止触发多次拉取
-      //scrollTop*2是为了在缩放的情况下也更好的获取到加载效果
-      if (clientHeight + scrollTop * 1.01 >= scrollHeight) {
-        if (scrollStatus.value == false) {
-          scrollStatus.value = true
-          getUserArticle()
-          console.log(pageNum + 1, "===加载更多内容……===");
-        }
-        return
 
 
-      }
-    }
-    // 销毁监听  (坑：移除监听事件时加true否则销毁不成功)
-    onBeforeUnmount(()=>{
-      window.removeEventListener("onmousewheel",window.onmousewheel,true)
-    })
-    const deleteArticle = (Id, index) => {
-      deleteArticleById(Id).then(res => {
-        userArticle.data.splice(index, 1)
-        console.log(res)
-      }).catch(err => {
-        console.log(err)
-      })
-
-    }
-    const updateArticle = (data)=>{
+    const updateArticle = (data) => {
       router.push({
-        path: `/${userData.data.username}/updateArticle`,query: {
+        path: `/${userRef.value.userData.data.username}/updateArticle`, query: {
           Id: data
         }
       })
     }
+    onMounted(() => {
+      console.log(userRef.value.viewIfnic)
+      // viewOnce.value = userRef.value.viewOnce
+
+    })
+    //文章页跳转
+    const goDetails = (articleId) => {
+      // console.log(articleId,userRef.value)
+      window.open(`/#/${userRef.value.userData.data.username}/${articleId}`, '_blank')
+      // context.emit('goDetails',articleId)
+    }
     return {
-      getUserArticle,
-      deleteArticle,
+      client,
+      userRef,
+      user_form,
+      psd_form,
       updateArticle,
-      nothing,
       goDetails,
-      userArticle,
-      avatarImg,
       articClassify,
       userData,
       formData,
       ruleFrom,
-      viewIf,
+      viewOnce,
       viewPsd,
       viewAdd,
       addArticinfo,
@@ -477,233 +338,26 @@ export default {
       currentData,
       articRefvalid,
       oldData,
+      viewinfoClick,
       viewPsdClick,
       viewAddFun,
-      onSubmit,
+      updateinfo,
       updatePsd,
-      cancle,
       getArticclassify,
       addArticclassify,
       deleteArticCate,
       viewArticCate,
       updateArticCate,
-      changeAvatar,
       jumpToAdd,
-      logout,
     };
   },
 };
 </script>
 <style lang="scss" scoped>
 .homebox {
+  max-width: 100rem;
   padding-top: 20px;
 
-  .container {
-
-    // height: 100vh;
-    // overflow: auto;
-    .userInfo {
-      width: 41.6rem;
-      height: 70rem;
-      position: fixed;
-      border-radius: 10px;
-      // background: rgba($color: #175ed0, $alpha: 0.5);
-      background-color: rgba($color: #ffffff, $alpha: 0.5);
-      backdrop-filter: blur(0.5);
-
-      .info {
-        padding-top: 30px;
-        .avatar{
-          width: 35px;
-          border-radius: 50%;
-        }
-
-        li {
-          padding-bottom: 15px;
-          padding-left: 8px;
-        }
-      }
-
-      .action {
-        display: flex;
-        padding: 10px 5px 0;
-
-        .avatar {
-          background-color: #409EFF;
-          color: white;
-        }
-
-        .psd {
-          margin-left: 10px;
-          color: white;
-          background-color: #409EFF;
-        }
-      }
-    }
-
-    .article_box {
-      padding-left: 43.6rem;
-      overflow: hidden;
-
-      .classify {
-        width: 100%;
-        display: flex;
-
-        .release {
-          width: 50%;
-          line-height: 36px;
-          background-color: #409EFF;
-        }
-
-        .draft {
-          width: 50%;
-          line-height: 36px;
-          background: #a81cce;
-        }
-      }
-
-      .userArticle {
-
-        // width: 1000px;
-        // margin: 0 auto;
-        // text-align: center;
-
-        .nothing {
-          line-height: 260px;
-        }
-
-        .Pb_li,
-        .nothing {
-          text-align: center;
-          width: 41.6rem;
-          height: 21.6rem;
-          border-radius: 20px;
-          margin: 0 auto 30px;
-          background: rgba(255, 255, 255, .5);
-          scale: 1;
-          transition: scale 0.5s;
-          overflow: hidden;
-          backdrop-filter: blur(6px);
-          // background: linear-gradient(to right, rgb(24, 24, 150), rgb(109, 103, 104));
-          // animation: fadeInAnimation ease 1s;
-
-          .info {
-            word-wrap: break-word;
-            line-height: 3rem;
-            text-align: center;
-            width: 100%;
-          }
-
-          .el-image {
-            overflow: hidden;
-            // background: rgb(109, 103, 104);
-            width: 90%;
-            height: 15rem;
-          }
-
-        }
-
-        .Pb_li {
-          position: relative;
-
-          .editor,
-          .delete {
-
-            text-align: center;
-            width: 50px;
-            line-height: 50px;
-            border-radius: 50%;
-            position: absolute;
-            top: calc(50% - 25px);
-            right: calc(50% - 25px);
-            display: none;
-            animation-fill-mode: forwards;
-            // right: calc(50% - 25px);
-          }
-
-          .editor {
-
-            background: rgba($color: #939bf2, $alpha: .5);
-          }
-
-          .delete {
-            background: rgba($color: #ea4c4c, $alpha: .5);
-          }
-        }
-
-        .end {
-          padding: 20px 0;
-          text-align: center;
-        }
-
-        .Pb_li:hover,
-        .nothing:hover {
-          cursor: pointer;
-          scale: 1.05;
-          box-shadow: 1rem 1rem 4.16rem #1956B4;
-
-          // animation: liHoverScale ease-in;
-          .editor {
-            display: block;
-            animation: editor ease 1s;
-            animation-fill-mode: forwards;
-          }
-
-          .delete {
-            display: block;
-            animation: delete ease 1s;
-            animation-fill-mode: forwards;
-          }
-
-          .editor:hover {
-            z-index: 999;
-            background-color: #939bf2;
-          }
-
-          .delete:hover {
-            z-index: 2;
-            background-color: #ea4c4c;
-          }
-        }
-
-        @keyframes editor {
-          0% {
-            opacity: 0;
-            // right: calc(50% - 25px);
-
-          }
-
-          100% {
-            opacity: 1;
-            right: calc(100% - 50px);
-          }
-        }
-
-        @keyframes delete {
-          0% {
-            opacity: 0;
-            // right: calc(50% - 25px);
-
-          }
-
-          100% {
-            opacity: 1;
-            right: 0;
-          }
-        }
-
-        @keyframes liHoverScale {
-          from {
-            scale: 1.0;
-          }
-
-          to {
-            scale: 1.1;
-          }
-        }
-      }
-    }
-  }
 }
 </style>
   

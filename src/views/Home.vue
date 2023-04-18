@@ -1,45 +1,34 @@
 <template>
- <!-- //pc端 -->
+  <!-- //pc端 -->
   <div v-if="client === 'pc'">
     <div class="common-layout">
       <el-container class="pc_container">
         <el-container class="pc_main">
           <el-header>PERESONAL-BLOG</el-header>
           <el-main>Main
-            <component class="cards" :is="HomeConent"></component>
+            <!-- <component class="cards" :is="HomeConent"></component> -->
           </el-main>
-          <el-footer>Footer</el-footer>
+          <!-- <el-footer>Footer</el-footer> -->
         </el-container>
         <el-aside class="pc_aside" width="33.3rem">
           Aside
           <!-- 账号密码表单 -->
           <el-form label-width="50px" status-icon>
             <el-form-item class="" label="账号">
-              <el-input 
-                v-model="username"
-                placeholder="请输入账号"
-                >
+              <el-input v-model="username" placeholder="请输入账号">
               </el-input>
             </el-form-item>
             <el-form-item label="密码" prop="pass">
-              <el-input
-                @keyup.enter="log"
-                v-model="password"
-                type="password"
-                placeholder="请输入密码"
-                maxlength="10"
-                clearable
-                show-password
-                
-                />
-              </el-form-item>
+              <el-input @keyup.enter="log" v-model="password" type="password" placeholder="请输入密码" maxlength="10" clearable
+                show-password />
+            </el-form-item>
           </el-form>
           <!-- 登陆注册按钮 -->
           <div class="action">
             <el-button type="success" @click="reg">注册</el-button>
-            <el-button type="primary" @click="log"  >登陆</el-button>
+            <el-button type="primary" @click="log">登陆</el-button>
           </div>
-          
+
         </el-aside>
       </el-container>
       <!-- <el-button type="danger" plain>Danger</el-button> -->
@@ -54,10 +43,11 @@
           <span>账号:</span><el-input v-model="username" max="1" placeholder="请输入用户名" />
         </div>
         <div class="input_box">
-          <span>账号:</span><el-input v-model="password" type="password" placeholder="请输入密码" maxlength="10" clearable show-password/>
+          <span>账号:</span><el-input v-model="password" type="password" placeholder="请输入密码" maxlength="10" clearable
+            show-password />
         </div>
         <div class="actions">
-          <button  @click="reg" class="reg">注册</button>
+          <button @click="reg" class="reg">注册</button>
           <button @click="log" class="log">登录</button>
         </div>
       </div>
@@ -66,64 +56,65 @@
 </template>
 <script>
 import HomeConent from '../component/content.vue'
-import { computed, reactive,toRefs } from 'vue'
-import {useStore} from 'vuex'
-import {login, register} from '../api/home/register_login'
-import {setToken} from '../untils/setToken'
+import {  reactive, toRefs } from 'vue'
+import { useStore } from 'vuex'
+import { login, register } from '../api/home/register_login'
+import { setToken } from '../untils/setToken'
 import { ElMessage } from 'element-plus'
 import router from '../router'
-export default{
-  setup(){
+export default {
+  setup() {
     const usr = localStorage.getItem('username')
     const user = reactive({
       username: usr,
       password: ''
     })
     const store = useStore()
-    const client =computed(()=>{
+    const client = store.state.client
+    //  computed(() => {
       // console.log(store.state.client)
-      return store.state.client
-    }) 
-    
+      
+    // })
+
     //注册 api
-    const reg = ()=> {
-      if (user.username && user.password){
-        register(user).then(res=> {
-                if(!(res.data.status)){
-                  ElMessage({
-                  message: '注册成功!',
-                  type: 'success'
-                  })
-                }
-                else{
-                  ElMessage({
-                  message: `注册失败!${res.data.message}`,
-                  type: 'error'
-                  })
-                }
-          }).catch(error =>{
-            return error
-          })
-      }else{
+    const reg = () => {
+      if (user.username && user.password) {
+        register(user).then(res => {
+          if (!(res.data.status)) {
             ElMessage({
-                message: '请先输入用户名及密码!',
-                type: 'warning'
-                })
+              message: '注册成功!',
+              type: 'success'
+            })
           }
+          else {
+            ElMessage({
+              message: `注册失败!${res.data.message}`,
+              type: 'error'
+            })
+          }
+        }).catch(error => {
+          return error
+        })
+      } else {
+        ElMessage({
+          message: '请先输入用户名及密码!',
+          type: 'warning'
+        })
+      }
     }
     //登录 api
     // console.log(1,store.state.islogin)
-    const log = ()=> {
-      if (user.username && user.password){
-      login(user).then(res=> {
+    const log = () => {
+      if (user.username && user.password) {
+        login(user).then(res => {
           //登陆成功状态为0，状态码200
-          if(!res.data.status){
-            setToken('username',user.username)
-            setToken(`PB_token`,res.data.token)
+          if (!res.data.status) {
+            setToken('username', user.username)
+            setToken(`PB_token`, res.data.token)
             setToken('startTime', new Date().getTime())
             store.state.islogin = true;
             store.state.username = user.username;
-            console.log(res)
+            // console.log(store.state.username)
             ElMessage({
               message: '登录成功!',
               type: 'success'
@@ -132,7 +123,7 @@ export default{
             // $route.params.username
             router.push('/square')
           }
-          else{
+          else {
             ElMessage({
               message: `登录失败!${res.data.message}`,
               type: 'error'
@@ -140,53 +131,70 @@ export default{
           }
         })
       }
-      else{
-          ElMessage({
-              message: '请先输入用户名及密码!',
-              type: 'warning'
-            })
-        }
+      else {
+        ElMessage({
+          message: '请先输入用户名及密码!',
+          type: 'warning'
+        })
+      }
     }
-  return {
-    client,
-    HomeConent,
-    ...toRefs(user),
-    reg,
-    log,
-    // ElMessage
+    return {
+      client,
+      HomeConent,
+      ...toRefs(user),
+      reg,
+      log,
+      // ElMessage
+
+    }
 
   }
-  
-}
 }
 
 </script>
 <style lang="less" scoped>
+.transition {
+  position: fixed;
+  margin-bottom: 0;
+}
+
 .pc_container {
   .pc_main {
-    // height: auto;
+
+    height: 100vh;
+
     // background: rgb(134, 144, 206) linear-gradient(to right, rgba(0, 255, 0, 0), rgba(10, 33, 233, 0.5));
     .el-header {
       text-align: center;
       font-size: 50px;
     }
+
     .el-main {
       height: 100vh;
-      .cards{
+
+      .cards {
         margin: 0 auto;
       }
     }
+
     .el-footer {
       background-color: forestgreen;
     }
   }
+
   .pc_aside {
+    z-index: 1;
+    position: absolute;
+    right: 0;
     background-color: white;
-    .el-form{
+
+    .el-form {
+      
       margin: 0 auto;
       width: 26.6rem;
     }
-    .action{
+
+    .action {
       text-align: center;
 
       // display: flex;
@@ -195,79 +203,83 @@ export default{
 }
 
 .login_box {
-      background: url('../assets/image/bg-mobile.jpg') no-repeat;
-      background-size: cover;
-      width: 100%;
-      // height: 100vh;
-      background-color: #00000060;
+  background: url('../assets/image/bg-mobile.jpg') no-repeat;
+  background-size: cover;
+  width: 100%;
+  height: 100vh;
+  background-color: #00000060;
+  text-align: center;
+  border-radius: 10px;
+  padding: 80px 50px;
+
+
+
+
+  .content {
+    span {
+      display: inline-block;
+      line-height: 50%;
+      font-size: 15px;
+      color: white;
+    }
+
+    h2 {
+      color: #ffffff90;
+      margin-top: 5%;
+      margin-bottom: 10%;
+    }
+
+    .input-box {
       text-align: center;
-      border-radius: 10px;
-      padding: 80px 50px;
-  
+      margin-top: 5%;
+    }
 
+    span {
+      color: #fff;
+    }
 
+    .el-input {
+      border: 0;
+      width: 60%;
+      height: 40px;
+      font-size: 15px;
+      color: #fff;
+      background: transparent;
+      // border-bottom: 2px solid #fff;
+      padding: 5px 10px;
+      outline: none;
+      margin-top: 10px;
+    }
 
-    .content{
-      span{
-        display: inline-block;
-        line-height: 50%;
-        font-size: 15px;
-        color: white;
-      }
-      
-      h2 {
-        color: #ffffff90;
-        margin-top: 5%;
-        margin-bottom: 10%;
-      }
-
-      .input-box {
-        margin-top: 5%;
-      }
-
-      span {
-        color: #fff;
-      }
-
-      .el-input {
-        border: 0;
-        width: 60%;
-        height: 40px;
-        font-size: 15px;
-        color: #fff;
-        background: transparent;
-        // border-bottom: 2px solid #fff;
-        padding: 5px 10px;
-        outline: none;
-        margin-top: 10px;
-      }
-      .actions{
-        button {
+    .actions {
+      padding-left: 10px;
+      button {
         display: inline-block;
         margin: 50px 15px;
-        width: 100px;
+        width: 25%;
         height: 30px;
         border-radius: 8px;
         border: 0;
-        color: #fff;
+        color: #617ae9;
         text-align: center;
         line-height: 30px;
         font-size: 15px;
       }
-      .register{ 
-       background-image: linear-gradient(to left, #7898C7, #425693);
-        
+
+      .register {
+        background-image: linear-gradient(to left, #7898C7, #425693);
+
       }
-      .login{
+
+      .login {
         background-image: linear-gradient(to right, #7898C7, #425693);
 
       }
 
-      }
     }
+  }
 
 
-    }
-
-    
+}
 </style>
+

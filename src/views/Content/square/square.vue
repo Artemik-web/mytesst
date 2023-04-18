@@ -1,6 +1,24 @@
 <template>
     <div class="square">
         <div class="square_content">
+            <div class="searchBox">
+                <div class="search">
+                    <el-input placeholder="search" v-model="searchStr" @input="searchTip"></el-input>
+                    <el-button @click="search" class="iconfont icon-chazhao"></el-button>
+                    <div class="box" v-if="searchBox">
+                        <ul>
+                            <li class="article" :key="index" v-for="(item, index) in searchRes.data">
+                                <div @click="changeTip(item.title)">
+                                    <h4>{{ item.title }}</h4>
+                                    <!-- <div>{{ item.content }}</div> -->
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+
+            </div>
             <el-tabs v-model="activeName" class="demo-tabs" @tab-click="tabChange">
                 <el-tab-pane :key="item.Id" :label="item.name" :name="item.Id" v-for="item in tagData.data">
                     <ul>
@@ -13,7 +31,6 @@
                                     <h2>{{ item.title }}</h2>
                                     <div class="cont"></div>
                                 </div>
-
                                 <el-image :class="index % 2 == 0 ? 'coverImgLeft' : 'coverImgRight'" v-loading="img_loading"
                                     :src="item.cover_img" alt="个人博客" />
                             </li>
@@ -30,12 +47,18 @@
 <script>
 import { reactive, ref, onBeforeUnmount } from 'vue'
 import { setSessionStorage, getSessionStorage } from '@/untils/setSession'
+import { searchData } from '@/api/square/search'
+import { searchTips } from '@/api/square/searchTips'
 import { getClassify } from '@/api/square/getClassify'
 import { getAllArticles } from '@/api/square/getAllArticles'
 import { getCover_img } from '@/api/square/getCover_img'
 // import { useRouter } from "vue-router"
 export default {
     setup() {
+        let searchBox = ref(false)
+        let searchRes = reactive({
+            data: []
+        })
         // let router = useRouter()
         let nothing = ref(false)
         let activeName = ref('first')
@@ -48,14 +71,54 @@ export default {
             data: []
         })
 
+        let searchStr = ref('')
+        const search = () => {
+            let str = searchStr.value.trim()
+            if (str == '') return
+            console.log(str)
+            searchData(str).then(res => {
+                searchRes.data = res.data.data
+                console.log(res.data)
+                str = ''
+            }).catch(err => {
+                console.log(err)
+            })
+            // searchStr.value.trim()
+            console.log(searchStr.value.trim())
+        }
+        const searchTip = () => {
+            
+            console.log('inputchuafa')
+            let str = searchStr.value.trim()
+            if (str == '') {
+                searchBox.value = false
+                searchRes.data = []
+            }
+            setTimeout(() => {
+                searchTips(str).then(res => {
+                    searchRes.data = res.data.data
+                    console.log(res.data.data)
+                    if(searchRes.data.length !== 0) searchBox.value = true
+                }).catch(err => {
+                    console.log(err)
+                })
+            }, 500)
+
+        }
+        const changeTip = (data)=>{
+            searchStr.value = data
+            searchBox.value = false
+        }
         let pageNum = 0
         // 文章分类切换函数，切换后拉取对应分类的所有文章
         const tabChange = async (data) => {
             pageNum = 0
-            await getCateArticles(data.paneName)
             //让tab到对应位置
             activeName.value = data.paneName
             scrollStatus.value = false
+            await getCateArticles(data.paneName)
+
+
 
         }
         //获取文章分类//tagData为所有文章大分类
@@ -74,28 +137,29 @@ export default {
             data: []
         })
         // 把获取到的文章数据中的封面从blob二进制装化成base64显示在文章封面
-        const blobToBase64 = (data) => {
-            console.log(data)
-            img_loading.value = true
-            getCover_img(data)
-                .then(res => {
-                    // let imgBlob = []
-                    // imgBlob = res
-                   
-                    //先清理之前的缓存在推入后来得到的
-                    // imgBlobUrl.data = []
-                    // for (let i = 0; i < imgBlob.length; i++) {
-                    //     imgBlobUrl.data.push(URL.createObjectURL(imgBlob[i]))
-                    // }
-                    articleData.data = res
-                    loading.value = false
-                    img_loading.value = false
-                    console.log('res',articleData.data)
-                })
-        }
+        // const blobToBase64 = (data) => {
+        //     // console.log(data)
+        //     img_loading.value = true
+        //     getCover_img(data)
+        //         .then(res => {
+        //             // let imgBlob = []
+        //             // imgBlob = res
+
+        //             //先清理之前的缓存在推入后来得到的
+        //             // imgBlobUrl.data = []
+        //             // for (let i = 0; i < imgBlob.length; i++) {
+        //             //     imgBlobUrl.data.push(URL.createObjectURL(imgBlob[i]))
+        //             // }
+        //             articleData.data = res
+        //             loading.value = false
+        //             img_loading.value = false
+        //             // console.log('res',articleData.data)
+        //         })
+        // }
         //获取所有的文章函数
         //data为文章分类
         const getCateArticles = (data) => {
+            if (scrollStatus.value) return
             // scrollStatus.value = false
             pageNum += 1
             // loading.value = true
@@ -107,24 +171,39 @@ export default {
                 if (pageNum == 1) {
                     articleData.data = []
                 }
-                if(res.data.status == 1){
+                if (res.data.status == 1) {
                     scrollStatus.value = true
-                    if(articleData.data.length == 0){
-                        console.log('111111111111',articleData.data)
+                    if (articleData.data.length == 0) {
+                        // console.log('111111111111',articleData.data)
                         nothing.value = true
                     }
-                }else{
-                    articleData.data.push(...res.data.data)
+                } else {
                     nothing.value = false
-                    await blobToBase64(articleData.data)
+                    getCover_img(res.data.data)
+                        .then(res => {
+                            // let imgBlob = []
+                            // imgBlob = res
+
+                            //先清理之前的缓存在推入后来得到的
+                            // imgBlobUrl.data = []
+                            // for (let i = 0; i < imgBlob.length; i++) {
+                            //     imgBlobUrl.data.push(URL.createObjectURL(imgBlob[i]))
+                            // }
+                            articleData.data.push(...res)
+                            // articleData.data = res
+                            loading.value = false
+                            img_loading.value = false
+
+                            // console.log('res',articleData.data)
+                        })
                 }
 
-               
-                    
+
+
                 loading.value = false
                 // console.log(1111111111,getSessionStorage('activeName'))
                 setSessionStorage('activeName', data)
-                console.log('getAllArticles', res.data.status, activeName.value, pageNum)
+                // console.log('getAllArticles', res.data.status, activeName.value, pageNum)
             }).catch(err => {
                 console.log(err)
             })
@@ -135,7 +214,9 @@ export default {
         }
         //滚轮刷新拉新
         let scrollStatus = ref(false)
-        window.onmousewheel = () => {
+        const scrollChange = () => {
+            console.log('1111111111111')
+            // confirm('1111111111111')
             //文档内容实际高度（包括超出视窗的溢出部分）
             let scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
             //滚动条滚动距离
@@ -143,25 +224,32 @@ export default {
             //窗口可视范围高度
             let clientHeight = window.innerHeight || Math.min(document.documentElement.clientHeight, document.body.clientHeight);
             //距离底部还有0.8视窗高度距离的时候触发加载
-            // let canset = clientHeight*0.3
+            let height = 50
             //定义一个加载状态，防止触发多次拉取
             //scrollTop*2是为了在缩放的情况下也更好的获取到加载效果
-            if (clientHeight + scrollTop * 1.01 >= scrollHeight) {
-                if (scrollStatus.value == false) {
+            if (clientHeight + scrollTop >= scrollHeight - height) {
+                if (scrollStatus.value !== true) {
                     // scrollStatus.value = true
                     getCateArticles(activeName.value)
-                    console.log(pageNum + 1, "===加载更多内容……===");
+                    // console.log(pageNum + 1, "===加载更多内容……===");
                 }
                 return
 
 
             }
         }
+        window.addEventListener('scroll', scrollChange)
         // 销毁监听  (坑：移除监听事件时加true否则销毁不成功)
         onBeforeUnmount(() => {
-            window.removeEventListener("onmousewheel", window.onmousewheel, true)
+            window.removeEventListener("scroll", scrollChange)
         })
         return {
+            searchBox,
+            changeTip,
+            searchTip,
+            searchStr,
+            searchRes,
+            search,
             nothing,
             loading,
             img_loading,
@@ -177,24 +265,45 @@ export default {
 </script>
 <style lang="scss" scoped>
 .square_content {
-    // // opacity: 0.5;
-    // width: 100rem;
-    // overflow-y: auto;
-    // margin: 0 auto;
-    // // padding-top: 56px;
-    // // padding-right: 6px;
-    // // background: rgb(134, 144, 206) linear-gradient(to right, rgba(0, 255, 0, 0), rgba(10, 33, 233, 0.5));
+    .searchBox {
+        .search {
+            position: relative;
+            padding: 25px 0;
+            text-align: center;
+
+            .el-input {
+                width: 25%;
+            }
+
+            .el-button {
+                width: 5%;
+            }
+
+            .box {
+                cursor: pointer;
+                margin: 0 auto ; 
+                width: 30%;
+                text-align: left;
+                border-radius: 8px;
+                // overflow-y: scroll;
+                z-index: 999;
+                background-color: rgba($color: #446D99, $alpha: 0.7);
+                backdrop-filter: blur(6px);
+                position: absolute;
+                left: 50%;
+                transform: translate(-50%); //水平、垂直都居中,也可以写成下面的方式
+            }
+        }
+
+    }
 
     .demo-tabs {
+
         min-height: 100vh;
-        // background: #F5DEB3;
-        // height: 100vh;
 
         ul {
-
-            // width: 1000px;
-            // margin: 0 auto;
-            // text-align: center;
+            margin: 0 auto;
+            max-width: 41.6rem;
 
             .nothing {
                 line-height: 260px;
@@ -203,10 +312,10 @@ export default {
             .Pb_li,
             .nothing {
                 text-align: center;
-                width: 41.6rem;
-                height: 21.6rem;
+                // width: 41.6rem;
+                height: 25vh;
                 border-radius: 20px;
-                margin: 0 auto 30px;
+                margin: 0 10px 30px;
                 background: rgba(255, 255, 255, .5);
                 scale: 1;
                 transition: scale 0.5s;
@@ -225,8 +334,8 @@ export default {
                 .el-image {
                     overflow: hidden;
                     // background: rgb(109, 103, 104);
-                    width: 90%;
-                    height: 15rem;
+                    // width: 90%;
+                    height: 80%;
                 }
 
                 // .coverImgLeft {

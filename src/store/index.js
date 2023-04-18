@@ -7,7 +7,7 @@ export default createStore({
     // isloading: false,
     islogin: false,
     // client: window.matchMedia('(min-width: 768px)').matches? 'pc' : 'mobile'
-    client: window.matchMedia('(min-width: 768px)').matches? 'pc' : 'mobile',
+    client: window.matchMedia('(min-width: 560px)').matches? 'pc' : 'mobile',
     username: '',
   },
  
