@@ -1,5 +1,5 @@
 <template>
-        <div class="userInfo" v-if="userData.data">
+        <div :class="client==='mobile'?'userInfo_mobile':'userInfo'" v-if="userData.data">
             <ul class="info">
                 <li>头像：<img class="avatar" :src="avatarImg" /></li>
                 <li>昵称：{{ userData.data.nickname }}</li>
@@ -11,7 +11,7 @@
 
                 <!-- 默认上传文件格式为file -->
                 <el-upload ref="upload" :auto-upload="false" :show-file-list="false" action="#" :on-change="changeAvatar">
-                    <el-button type="primary" class="avatar">修改头像</el-button>
+                    <el-button type="primary" class="avatarC">修改头像</el-button>
                 </el-upload>
 
                 <el-button class="psd" @click="updateBtn">重置密码</el-button>
@@ -24,7 +24,7 @@
 
 <script>
 import { useStore } from "vuex";
-import { reactive, ref } from "vue";
+import { reactive, ref ,computed} from "vue";
 import { removeToken } from "@/untils/setToken";
 import { deleteSessionStorage } from "@/untils/setSession";
 import router from "@/router";
@@ -36,6 +36,9 @@ export default {
     setup(props, context) {
         let viewIfnic = ref(false)
         const store = useStore();
+        let client = computed(()=>{
+            return store.state.client
+        })
         const userData = reactive({
             data: []
         })
@@ -126,6 +129,7 @@ export default {
         //获取用户信息
         getinfo();
         return {
+            client,
             userData,
             avatarImg,
             viewIfnic,
@@ -138,7 +142,9 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.userInfo {
+
+.userInfo, userInfo_mobile{
+    
     width: 40%;
     height: 50%;
     float: left;
@@ -181,6 +187,11 @@ export default {
             color: white;
             background-color: #409EFF;
         }
+    }
+}
+.userInfo_mobile{
+    .avatar{
+        display: none;
     }
 }
 </style>

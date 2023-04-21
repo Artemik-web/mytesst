@@ -2,33 +2,33 @@
   <div class="homebox">
     <div class="container">
       <div class="avatarList">
-          <el-button @click="jumpToAdd">写文章</el-button>
-          <el-button @click="viewAddFun">新增文章分类</el-button>
-          <div class="formlist" v-if="viewAdd">
-            <el-input style="width: 16.6rem;display: block;" v-model="addArticinfo.name"></el-input>
-            <el-input style="width: 16.6rem;display: block;" v-model="addArticinfo.alias"></el-input>
-            <el-button @click="addArticclassify">提交</el-button>
-          </div>
-          <el-menu active-text-color="#ffd04b" background-color="#545c64" class="el-menu-vertical-demo" default-active="2"
-            text-color="#fff">
-            <el-sub-menu index="1">
-              <template #title>
-                <span>Navigator One</span>
-              </template>
-              <el-menu-item-group title="Group One">
-                <div :key="index" v-for="(item, index) in articClassify.data" style="padding: 0 10px">
-                  <el-menu-item style="display:inline-block; width: 16.6rem;" :index="`1-${index + 1}}`">
-                    {{ item.name }}
-                  </el-menu-item>
-                  <el-button style="display:inline-block" @click="viewArticCate(item)">查看</el-button>
-                  <el-button style="display:inline-block" @click="deleteArticCate(item.Id)">删除</el-button>
-                </div>
-              </el-menu-item-group>
-            </el-sub-menu>
-          </el-menu>
-          <user  v-show="client === 'pc'" ref="userRef" @viewinfoClick="viewinfoClick" @viewPsdClick="viewPsdClick"></user>
-          <articleList @goDetails="goDetails" @updateArticle="updateArticle"></articleList>
+        <el-button @click="jumpToAdd">写文章</el-button>
+        <el-button @click="viewAddFun">新增文章分类</el-button>
+        <div class="formlist" v-if="viewAdd">
+          <el-input style="width: 16.6rem;display: block;" v-model="addArticinfo.name"></el-input>
+          <el-input style="width: 16.6rem;display: block;" v-model="addArticinfo.alias"></el-input>
+          <el-button @click="addArticclassify">提交</el-button>
         </div>
+        <el-menu active-text-color="#ffd04b" background-color="#545c64" class="el-menu-vertical-demo" default-active="2"
+          text-color="#fff">
+          <el-sub-menu index="1">
+            <template #title>
+              <span>Navigator One</span>
+            </template>
+            <el-menu-item-group title="Group One">
+              <div :key="index" v-for="(item, index) in articClassify.data" style="padding: 0 10px">
+                <el-menu-item style="display:inline-block; width: 16.6rem;" :index="`1-${index + 1}}`">
+                  {{ item.name }}
+                </el-menu-item>
+                <el-button style="display:inline-block" @click="viewArticCate(item)">查看</el-button>
+                <el-button style="display:inline-block" @click="deleteArticCate(item.Id)">删除</el-button>
+              </div>
+            </el-menu-item-group>
+          </el-sub-menu>
+        </el-menu>
+        <user ref="userRef" @viewinfoClick="viewinfoClick" @viewPsdClick="viewPsdClick"></user>
+        <articleList @goDetails="goDetails" @updateArticle="updateArticle"></articleList>
+      </div>
 
     </div>
     <el-dialog :show-close="false" v-model="viewArticCateData" title="当前文章分类信息">
@@ -86,7 +86,7 @@ export default {
   },
   setup() {
     let store = useStore()
-    let client = computed(()=>{
+    let client = computed(() => {
       return store.state.client
     })
     const userRef = ref('userRef')

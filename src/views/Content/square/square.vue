@@ -302,6 +302,7 @@ export default {
         min-height: 100vh;
 
         ul {
+            padding-top: 20px;
             margin: 0 auto;
             max-width: 41.6rem;
 

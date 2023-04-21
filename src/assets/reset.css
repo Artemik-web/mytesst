@@ -10,7 +10,7 @@
  ::-webkit-scrollbar{
   /* 滚动条整体样式 */
   width: 5px;
-  height: 5px;
+  height: 10px;
 }
 /* 滚动条里的小方块 */
 ::-webkit-scrollbar-thumb{
@@ -45,7 +45,7 @@ body {
   /* background-color: #f2f2f2 !important; */
   
 /* 加载背景图 */
-background-image: url('https://image.personalblog.cn/admin-1680083054020');
+/* background-image: url('https://image.personalblog.cn/admin-1680083054020'); */
 /* background-image: url('./image/bggezi.jpg'); */
 /* 背景图垂直、水平均居中 */
 background-position: center center;
@@ -56,7 +56,7 @@ background-attachment: fixed;
 /* 让背景图基于容器大小伸缩 */
 background-size: cover;
 /* 设置背景颜色，背景图加载过程中会显示背景色 */
-background-color: #fffdfd;
+background: linear-gradient(to right, #c2e59c, #64b3f4); 
 
 
 }

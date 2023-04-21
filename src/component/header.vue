@@ -52,7 +52,7 @@ export default {
 
     position: fixed;
     z-index: 1029;
-    width: 100vw;
+    width: 100%;
     background-color: #8EB3DF;
 
     .headerbox {
