@@ -2,7 +2,6 @@
     <div class="detail_content">
         <div class="author" v-if="client === 'pc'">
             <ul class="info">
-                11111111111111111
                 <li>头像：<el-avatar
                         :src="authorInfo.data.user_pic || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'" />
                 </li>
@@ -11,10 +10,10 @@
                 <li>邮箱: {{ authorInfo.data.email }}</li>
             </ul>
             <ul class="fx">
-                <li>1111</li>
-                <li>1111</li>
-                <li>1111</li>
-                <li>1111</li>
+                <li>节点/锚点</li>
+                <li>节点/锚点</li>
+                <li>节点/锚点</li>
+                <li>节点/锚点</li>
             </ul>
         </div>
         <div :class="client === 'pc' ? 'details' : 'w100'">
@@ -104,9 +103,12 @@ export default {
             if(client.value !== 'pc') return
             const topVal = document.documentElement.scrollTop
             if(topVal >= 250){
-                document.getElementsByClassName('fx')[0].classList.add('maod')
+                // document.getElementsByClassName('fx')[0].classList.add('maod')
+                document.getElementsByClassName('fx')[0].style.position = 'fixed'
+                document.getElementsByClassName('fx')[0].style.top = '76px'
             }else{
-                document.getElementsByClassName('fx')[0].classList.remove('maod')
+                document.getElementsByClassName('fx')[0].style.position = 'relative'
+                document.getElementsByClassName('fx')[0].style.top = '0'
             }
         }
         window.addEventListener('scroll', toFixed)
@@ -134,15 +136,25 @@ export default {
         background-color: rgba($color: #fff, $alpha: 0.5);
         // backdrop-filter: blur(6px);
         width: calc((20% - 20px));
-        height: 200px;
+        // height: 200px;
         border: 1px red solid;
         border-radius: 8px;
         position: absolute;
         right: 20px;
-        .maod{
-            position: fixed;
-            top: 76px;
+        .info{
+
         }
+        .fx{
+            transition: top .5s ease;
+            border: 1px red solid;
+        }
+        // .maod{
+        //     position: fixed;
+        //     top: 76px;
+            
+            
+        // }
+        
     }
 
     .details,

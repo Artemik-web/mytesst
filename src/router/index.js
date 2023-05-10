@@ -1,6 +1,6 @@
 // import Vue from 'vue'
 // vue-Router@4.0+的写法
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import { removeToken, setToken } from '@/untils/setToken'
 import { ElMessage } from 'element-plus'
 // 进度条
@@ -75,18 +75,19 @@ const routes = [
 ]
 
 const router = createRouter({
-    history: createWebHashHistory(),
+    // history: createWebHashHistory(),
+    history: createWebHistory(),
     routes
 })
 
 //路由导航守卫
 router.beforeEach((to, from, next) => {
+    NProgress.start()
     //如果token不存在
     if (!localStorage.getItem('PB_token')) {
         //那就判断要去的页面是不是home登录
-        if (to.path !== '/home') {
+        if (to.path !== '/home' && to.path !== '/develop') {
             ElMessage({ message: '请先登录账号', type: 'error' })
-            NProgress.start()
             next({ name: 'home' })
         }
     }
@@ -100,7 +101,6 @@ router.beforeEach((to, from, next) => {
         if (onlineTime > 36000000) {
             ElMessage({ message: '长时间未验证账号,请重新登录！', type: 'error' })
             removeToken(['PB_token', 'username', 'startTime'])
-            NProgress.start()
             next({ name: 'home' })
         }
         //每次刷新在一小时内就更新startTime
@@ -108,7 +108,7 @@ router.beforeEach((to, from, next) => {
             setToken('startTime', new Date().getTime())
         }
     }
-    NProgress.start()
+    
     next()
 })
 router.afterEach(() => {

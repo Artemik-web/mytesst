@@ -16,7 +16,7 @@ export default {
             router.push({name: 'square'})
         }
         const goCurrentArticle = ()=>{
-            console.log(`/#/${route.params.username}/${route.query.articleId}`)
+            // console.log(route)
             window.open(`/#/${route.params.username}/${route.query.articleId}`, '_blank')
         }  
         return {

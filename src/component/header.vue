@@ -53,9 +53,11 @@ export default {
     position: fixed;
     z-index: 1029;
     width: 100%;
+    // text-align: center;
     background-color: #8EB3DF;
 
     .headerbox {
+        max-width: 100rem;
         height: 56px;
         // width: 100%;
         // width: 100rem;

@@ -8,7 +8,8 @@ import { ElMessage } from 'element-plus'
 import { getToken } from './setToken'
 const httpinsatnce = axios.create({
     baseURL: '/api',
-    timeout: 90000,
+    // baseURL: 'https://47.115.214.138/api/',
+    timeout: 5000,
     headers: {
 		// 设置后端需要的传参类型
 		'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',

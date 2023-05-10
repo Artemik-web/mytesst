@@ -6,7 +6,7 @@ export default createStore({
   state: {
     // isloading: false,
     islogin: false,
-    // client: window.matchMedia('(min-width: 768px)').matches? 'pc' : 'mobile'
+    // client: ('ontouchstart' in document.documentElement) ? 'pc' : 'mobile',
     client: window.matchMedia('(min-width: 560px)').matches? 'pc' : 'mobile',
     username: '',
   },

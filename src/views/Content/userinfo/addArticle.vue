@@ -19,11 +19,8 @@
                     <el-upload class="avatar-uploader" accept="image/jpg,image/jpeg,image/png" ref="upload" action="#"
                         :on-change="uploadCover" :auto-upload="false" :show-file-list="false">
                         <!-- {{ image }} -->
-                        <img v-if="true" :src="image" class="avatar" />
+                        <img v-if="true" :src="image" :alt="image" class="avatar" />
 
-                        <el-icon v-else class="avatar-uploader-icon">
-                            <Plus />
-                        </el-icon>
                     </el-upload>
                 </el-form-item>
             </el-form>
@@ -53,7 +50,6 @@
     </div>
 </template>
 <script>
-import { Plus } from '@element-plus/icons-vue'
 import OSS from 'ali-oss' // 引入阿里oss
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
 // import { Plus } from '@element-plus/icons-vue'
@@ -69,7 +65,7 @@ import { addArticle } from '@/api/userinfo/addArticle/addArticle'
 import { updateArticle } from '@/api/userinfo/addArticle/updateArticle'
 import { ElMessage, } from 'element-plus'
 export default {
-    components: { Editor, Toolbar, Plus },
+    components: { Editor, Toolbar, },
     setup() {
         let articleInfo = reactive({
             data: {
@@ -81,7 +77,7 @@ export default {
                 cover_img: {}
             }
         })
-        let image = ref('')
+        let image = ref('请选择封面')
         let route = useRoute()
         let viewUpdate = route.query.Id
         // console.log(1111111,route)
@@ -104,7 +100,7 @@ export default {
         //阿里云OSS
         let client = new OSS({
             region: 'oss-cn-heyuan',//地域（在创建 Bucket 的时候指定的中心位置），这里可能不知道具体地域怎么填其实就是 oss-cn-中心位置 ，例：region:'oss-cn-chengdu'，chengdu则是创建bucket是指定的位置成都。
-         
+
             bucket: 'vue3-my-blog-hartbed' //OSS 存储区域名
         })
         //定义一个用来监听文章是否已经发布或者存入草稿的变量来决定如何处理上传文章需要和不需要的图片
@@ -325,7 +321,7 @@ export default {
                         //编辑器销毁
                         editorDestroy()
                         router.push({
-                            path: `/${route.query.username}/addArticle/addSuccess`,query:{articleId: res.data.articleId}
+                            path: `/${route.params.username}/addArticle/addSuccess`, query: { articleId: res.data.articleId }
                         })
                     }).catch(err => {
                         console.log('报错', err)
@@ -346,20 +342,19 @@ export default {
             })
 
         }
-        console.log(route)
+        
         const editorUpdate = () => {
             console.log(articleInfo.data)
             updateArticle(articleInfo.data).then(res => {
-                console.log(articleInfo.data,route)
-                ElMessage({message: `${res.data.message}`, type: 'success'})
+                console.log(articleInfo.data, route)
+                ElMessage({ message: `${res.data.message}`, type: 'success' })
                 //编辑器销毁
                 editorDestroy()
                 let path_username = route.params.username
-                
                 router.push({
-                    path: `/${path_username}/addArticle/addSuccess`,query:{articleId: articleInfo.data.Id}
+                    path: `/${path_username}/addArticle/addSuccess`, query: { articleId: articleInfo.data.Id }
                 })
-                
+
             }).catch(err => {
                 console.log(err)
             })
@@ -388,21 +383,22 @@ export default {
 </script>    
 
 <style lang="scss" scoped>
-.avatar-uploader .avatar {
-    height: 31.3rem;
-    width: 50rem;
+.avatar-uploader {
     background-color: rgb(124, 218, 233);
-    display: block;
     border: 2px blue solid;
+
+    .avatar {
+        height: 50%;
+        width: 50%;
+        object-fit: contain;
+    }
 }
 
 .container {
     // background: white;
 
     // display: flex;
-    .avatar-uploader {
-        display: block;
-    }
+    
 
     .textBox {
         // width: 50%;
@@ -420,29 +416,29 @@ export default {
         }
     }
 
-    .viewBox {
-        width: 50%;
-        word-wrap: break-word;
-        word-break: break-all;
-        overflow: auto;
-        border: 2px red solid;
+    // .viewBox {
+    //     width: 50%;
+    //     word-wrap: break-word;
+    //     word-break: break-all;
+    //     overflow: auto;
+    //     border: 2px red solid;
 
-        .titleView {
-            height: 8rem;
-            background-color: azure;
-            text-align: center;
-            line-height: 8rem;
-            font-size: 5rem;
-            position: fixed;
-            width: 49.6rem;
-        }
+    //     .titleView {
+    //         height: 8rem;
+    //         background-color: azure;
+    //         text-align: center;
+    //         line-height: 8rem;
+    //         font-size: 5rem;
+    //         position: fixed;
+    //         width: 49.6rem;
+    //     }
 
-        .content {
-            height: 100%;
-            padding-top: 9rem;
-            max-height: 320px;
-        }
-    }
+    //     .content {
+    //         height: 100%;
+    //         padding-top: 9rem;
+    //         max-height: 320px;
+    //     }
+    // }
 
     // ::v-deep {
 

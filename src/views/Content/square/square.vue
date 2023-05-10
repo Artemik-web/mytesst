@@ -47,14 +47,15 @@
 <script>
 import { reactive, ref, onBeforeUnmount } from 'vue'
 import { setSessionStorage, getSessionStorage } from '@/untils/setSession'
-import { searchData } from '@/api/square/search'
+// import { searchData } from '@/api/square/search'
 import { searchTips } from '@/api/square/searchTips'
 import { getClassify } from '@/api/square/getClassify'
 import { getAllArticles } from '@/api/square/getAllArticles'
 import { getCover_img } from '@/api/square/getCover_img'
-// import { useRouter } from "vue-router"
+import { useRouter } from "vue-router"
 export default {
     setup() {
+        let router = useRouter()
         let searchBox = ref(false)
         let searchRes = reactive({
             data: []
@@ -75,16 +76,21 @@ export default {
         const search = () => {
             let str = searchStr.value.trim()
             if (str == '') return
-            console.log(str)
-            searchData(str).then(res => {
-                searchRes.data = res.data.data
-                console.log(res.data)
-                str = ''
-            }).catch(err => {
-                console.log(err)
-            })
+            // console.log(str,router) 
+            // let q =  searchStr.value.split(' ').filter((item)=>{
+            //     return item != ''
+            // })
+            // console.log(q)
+            let url =  router.resolve({path:'/search', query: {q: str}})
+            window.open(url.href, '_blank')
+            // searchData(str).then(res => {
+            //     searchRes.data = res.data.data
+            //     console.log(res.data)
+            //     str = ''
+            // }).catch(err => {
+            //     console.log(err)
+            // })
             // searchStr.value.trim()
-            console.log(searchStr.value.trim())
         }
         const searchTip = () => {
             
@@ -209,13 +215,12 @@ export default {
             })
         }
         const goDetails = (articleId) => {
-            window.open(`/#/square/${articleId}`, '_blank')
+            window.open(`/square/${articleId}`, '_blank')
             // console.log(router)
         }
         //滚轮刷新拉新
         let scrollStatus = ref(false)
         const scrollChange = () => {
-            console.log('1111111111111')
             // confirm('1111111111111')
             //文档内容实际高度（包括超出视窗的溢出部分）
             let scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
